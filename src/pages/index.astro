@@ -186,8 +186,11 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     body:has(.card-code:hover) .bg-overlay{
       background: radial-gradient(circle at 80% 50%, rgba(0,255,136,.20), transparent 70%);
     }
+    body:has(.card-extension:hover) .bg-overlay{
+      background: radial-gradient(circle at 70% 65%, rgba(0,243,255,.20), transparent 65%);
+    }
     body:has(.card-contact:hover) .bg-overlay{
-      background: radial-gradient(circle at 80% 20%, rgba(255,157,0,.22), transparent 65%);
+      background: radial-gradient(circle at 90% 50%, rgba(255,157,0,.22), transparent 65%);
     }
 
     .hero{
@@ -222,7 +225,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     }
 
     .stage{
-      width:min(1100px, 92vw);
+      width:min(1220px, 92vw);
       position: relative;
       display:flex;
       justify-content:center;
@@ -231,7 +234,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     .menu-container{
       display:flex;
       gap: 22px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content:center;
       align-items:stretch;
       width: 100%;
@@ -251,7 +254,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       cursor:pointer;
       position:relative;
       overflow:hidden;
-      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .2s.ease;
+      transition: transform .35s ease, box-shadow .35s.ease, border-color .35s ease, opacity .2s ease;
       backdrop-filter: blur(6px);
       user-select:none;
     }
@@ -262,7 +265,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), transparent 55%);
       transform: rotate(12deg);
       opacity:.55;
-      transition: opacity .35s.ease;
+      transition: opacity .35s ease;
     }
     .menu-card:hover::before{ opacity:.9; }
     .menu-card:hover{
@@ -426,6 +429,101 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       max-width: 100%;
     }
 
+    /* Extension icon */
+    .card-extension .ext-orb {
+      position: relative;
+      width: 84px;
+      height: 84px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(0,243,255,.16), rgba(188,19,254,.18)),
+        radial-gradient(circle at 18% 22%, rgba(0,243,255,.75), transparent 55%),
+        radial-gradient(circle at 82% 78%, rgba(188,19,254,.85), transparent 55%);
+      box-shadow:
+        0 0 28px rgba(0,243,255,.35),
+        0 0 60px rgba(188,19,254,.35);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .card-extension .ext-window {
+      position: relative;
+      width: 68px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.76);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 0 18px rgba(0,0,0,.85);
+      overflow: hidden;
+    }
+
+    .card-extension .ext-window-top {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 12px;
+      background: linear-gradient(90deg, rgba(0,243,255,.55), rgba(188,19,254,.65));
+      display: flex;
+      align-items: center;
+      padding-inline: 6px;
+      gap: 4px;
+    }
+
+    .card-extension .ext-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.8);
+      opacity: .8;
+    }
+
+    .card-extension .ext-body {
+      position: absolute;
+      inset: 12px 4px 4px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-extension .ext-piece {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0,243,255,.9), rgba(0,255,136,.95));
+      box-shadow:
+        0 0 16px rgba(0,243,255,.55),
+        0 0 30px rgba(0,255,136,.45);
+      clip-path: path("M6 0 H18 Q22 0 22 4 V8 Q26 8 26 12 Q26 16 22 16 V20 Q22 24 18 24 H6 Q2 24 2 20 V16 Q-2 16 -2 12 Q-2 8 2 8 V4 Q2 0 6 0 Z");
+      animation: extFloat 2.4s ease-in-out infinite;
+    }
+
+    .card-extension .ext-plus {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #001510;
+      font-weight: 900;
+      font-size: 0.75rem;
+      text-shadow: 0 0 10px rgba(255,255,255,.45);
+    }
+
+    @keyframes extFloat {
+      0%   { transform: translateY(0) scale(1); }
+      50%  { transform: translateY(-4px) scale(1.03); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .card-extension:hover .ext-orb {
+      box-shadow:
+        0 0 30px rgba(0,243,255,.7),
+        0 0 80px rgba(188,19,254,.65);
+      transform: translateY(-4px);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
     /* Contact icon */
     .env-box{
       width: 76px;
@@ -442,7 +540,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       transform-box: fill-box;
       transform-origin: top center;
       transform: rotateX(0deg);
-      transition: transform .55s.ease;
+      transition: transform .55s ease;
     }
 
     /* PANELS */
@@ -494,7 +592,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       text-decoration:none;
       color:#fff;
       min-height: 58px;
-      transition: transform .18s.ease, border-color .18s.ease, box-shadow .18s.ease, background .18s.ease;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s.ease;
     }
     .contact-pill:hover{
       transform: translateY(-2px);
@@ -558,7 +656,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       z-index: 90;
       opacity: 0;
       pointer-events: none;
-      transition: opacity .22s.ease, transform .22s.ease;
+      transition: opacity .22s ease, transform .22s.ease;
     }
     .domain-wall .head{
       display:flex;
@@ -678,6 +776,12 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       transition-delay: var(--panelDelay);
     }
 
+    @media (max-width: 1280px){
+      .menu-container{
+        flex-wrap: wrap;
+      }
+    }
+
     @media (max-width: 980px){
       body.focus-domains #cardDomains,
       body.focus-contact #cardContact{
@@ -695,107 +799,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       }
       .domain-rise ul{ padding-inline:16px; }
     }
-
-    /* ===== Extension icon (browser add-on) ===== */
-    body:has(.card-extension:hover) .bg-overlay{
-      background: radial-gradient(circle at 20% 80%, rgba(0,243,255,.20), transparent 65%);
-    }
-
-    .card-extension .ext-orb {
-      position: relative;
-      width: 84px;
-      height: 84px;
-      border-radius: 20px;
-      display: grid;
-      place-items: center;
-      background:
-        linear-gradient(135deg, rgba(0,243,255,.16), rgba(188,19,254,.18)),
-        radial-gradient(circle at 18% 22%, rgba(0,243,255,.75), transparent 55%),
-        radial-gradient(circle at 82% 78%, rgba(188,19,254,.85), transparent 55%);
-      box-shadow:
-        0 0 28px rgba(0,243,255,.35),
-        0 0 60px rgba(188,19,254,.35);
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
-    .card-extension .ext-window {
-      position: relative;
-      width: 68px;
-      height: 46px;
-      border-radius: 12px;
-      background: rgba(0,0,0,.76);
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: 0 0 18px rgba(0,0,0,.85);
-      overflow: hidden;
-    }
-
-    .card-extension .ext-window-top {
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 12px;
-      background: linear-gradient(90deg, rgba(0,243,255,.55), rgba(188,19,254,.65));
-      display: flex;
-      align-items: center;
-      padding-inline: 6px;
-      gap: 4px;
-    }
-
-    .card-extension .ext-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.8);
-      opacity: .8;
-    }
-
-    .card-extension .ext-body {
-      position: absolute;
-      inset: 12px 4px 4px 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-extension .ext-piece {
-      position: relative;
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(0,243,255,.9), rgba(0,255,136,.95));
-      box-shadow:
-        0 0 16px rgba(0,243,255,.55),
-        0 0 30px rgba(0,255,136,.45);
-      /* شكل قطعة puzzle يرمز لإضافات المتصفح */
-      clip-path: path("M6 0 H18 Q22 0 22 4 V8 Q26 8 26 12 Q26 16 22 16 V20 Q22 24 18 24 H6 Q2 24 2 20 V16 Q-2 16 -2 12 Q-2 8 2 8 V4 Q2 0 6 0 Z");
-      animation: extFloat 2.4s ease-in-out infinite;
-    }
-
-    .card-extension .ext-plus {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: #001510;
-      font-weight: 900;
-      font-size: 0.75rem;
-      text-shadow: 0 0 10px rgba(255,255,255,.45);
-    }
-
-    @keyframes extFloat {
-      0%   { transform: translateY(0) scale(1); }
-      50%  { transform: translateY(-4px) scale(1.03); }
-      100% { transform: translateY(0) scale(1); }
-    }
-
-    .card-extension:hover .ext-orb {
-      box-shadow:
-        0 0 30px rgba(0,243,255,.7),
-        0 0 80px rgba(188,19,254,.65);
-      transform: translateY(-4px);
-      transition: transform .25s ease, box-shadow .25s ease;
-    }
-    /* ===== نهاية ستايل extension ===== */
   </style>
 
   <!-- photo layer controlled by hovered domain -->
@@ -924,7 +927,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Snippets & templates</div>
         </div>
 
-        <!-- Extension (من نفس الخط وقبل Contact) -->
+        <!-- Extension (قبل Contact) -->
         <div class="menu-card card-extension" id="cardExtension">
           <div class="ext-orb">
             <div class="ext-window">
@@ -944,7 +947,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Browser add-on</div>
         </div>
 
-        <!-- Contact -->
+        <!-- Contact (بعد Extension) -->
         <div class="menu-card card-contact" id="cardContact">
           <div class="env-box">
             <svg class="env-svg" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -990,7 +993,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     const listEl = document.getElementById("domainRiseList");
     const riseEl = document.getElementById("domainRise");
 
-    // ملاحظة: لم نعد نستخدم innerHTML هنا، القائمة تأتي من Astro
     let autoY = 0;
     let autoSpeed = 0.35;
     let autoPaused = false;
@@ -1052,7 +1054,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     ];
     const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
 
-    // نضيف مصفوفة صغيرة مستقلة للاستخدام التجميلي (بدون الاعتماد على latestDomains داخل JS)
     const domainWords = [
       "BostonCPAFirm.com",
       "HomebuyersDubai.com",
@@ -1227,7 +1228,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       if (!inside) resetAll();
     });
 
-    // click routes (you can change later)
+    // click routes (بدون / في البداية)
     document.getElementById("cardPrompts").addEventListener("click", () => window.location.href = "prompts/");
     document.getElementById("cardCode").addEventListener("click", () => window.location.href = "code/");
     cardDomains.addEventListener("click", () => window.location.href = "domains/");
@@ -1236,7 +1237,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     const cardExtension = document.getElementById("cardExtension");
     if (cardExtension){
       cardExtension.addEventListener("click", () => {
-        // عدّل هذا الرابط لرابط الإضافة الحقيقي (Chrome/Edge/Firefox أو صفحة تعريف)
         window.location.href = "extension/";
       });
     }
