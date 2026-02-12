@@ -75,9 +75,22 @@ const allExtensions = [...(data.extensions ?? [])];
       })
     )}
   >
-    <div class="crumb">
-      <a href="/extensions">← All Extensions</a> /
-      <span id="crumbLabel"> Extension details</span>
+    <div class="topbar">
+      <a href="/extension" class="back-btn">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Extensions
+      </a>
+
+      <div class="crumb-name" id="crumbLabel">Extension details</div>
     </div>
 
     <div class="head-row">
@@ -224,17 +237,57 @@ const allExtensions = [...(data.extensions ?? [])];
       padding:32px 18px 64px;
     }
 
-    .crumb{
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
       margin-bottom:20px;
-      font-size:.85rem;
-      color:rgba(255,255,255,.65);
+      gap:16px;
+      flex-wrap:wrap;
     }
-    .crumb a{
-      color:var(--neon-blue);
+
+    .back-btn{
       text-decoration:none;
+      color: var(--neon-blue);
+      font-weight:700;
+      font-size:.95rem;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,243,255,.25);
+      background: rgba(0,243,255,.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 
+        0 0 18px rgba(0,243,255,.12),
+        0 10px 24px rgba(0,0,0,.6);
+      transition: all .22s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .crumb a:hover{
-      text-decoration:underline;
+    .back-btn:hover{
+      transform: translateY(-2px);
+      background: var(--neon-blue);
+      color: #000;
+      border-color: var(--neon-blue);
+      box-shadow: 
+        0 0 28px rgba(0,243,255,.55),
+        0 12px 28px rgba(0,0,0,.7);
+    }
+    .back-btn svg{
+      flex-shrink:0;
+      transition: transform .2s ease;
+    }
+    .back-btn:hover svg{
+      transform: translateX(-3px);
+    }
+
+    .crumb-name{
+      font-size:1rem;
+      font-weight:600;
+      color:rgba(255,255,255,.75);
+      letter-spacing:.5px;
     }
 
     .head-row{
@@ -424,6 +477,10 @@ const allExtensions = [...(data.extensions ?? [])];
       .layout{
         grid-template-columns: 1fr;
       }
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
     }
   </style>
 
@@ -490,7 +547,7 @@ const allExtensions = [...(data.extensions ?? [])];
       const downloadBtn = document.getElementById('downloadBtn');
 
       if(titleEl) titleEl.textContent = name;
-      if(crumbEl) crumbEl.textContent = ' ' + name;
+      if(crumbEl) crumbEl.textContent = name;
       if(descEl) descEl.textContent = desc;
       if(catEl) catEl.textContent = cat;
 
