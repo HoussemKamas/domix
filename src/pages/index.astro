@@ -35,7 +35,7 @@ const latestPrompts    = [...data.prompts].sort(byIdDesc).slice(0, 3);
 const latestCode       = [...data.code].sort(byIdDesc).slice(0, 3);
 const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
 
-// Generate background chips data
+// Generate background chips
 const codeSnips = [
   "fetch('/api/domains')",
   "deploy('edge-functions')",
@@ -52,7 +52,7 @@ const domainWords = [
 ];
 
 const bgChips = [];
-for(let i = 0; i < 30; i++){
+for(let i = 0; i < 35; i++){
   const mode = Math.random();
   let className = "bg-chip";
   if (mode < 0.33) className += " code";
@@ -110,7 +110,7 @@ for(let i = 0; i < 30; i++){
     .bg-photo{
       position: fixed;
       inset:0;
-      z-index:1;
+      z-index:-5;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -132,7 +132,7 @@ for(let i = 0; i < 30; i++){
         linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
       background-size: 52px 52px;
-      z-index:2;
+      z-index:-4;
       perspective: 600px;
       transform-style: preserve-3d;
       animation: gridMove 18s linear infinite;
@@ -149,7 +149,7 @@ for(let i = 0; i < 30; i++){
     .bg-overlay{
       position: fixed;
       inset:0;
-      z-index:3;
+      z-index:-3;
       pointer-events:none;
       transition: .45s ease;
       background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.04), transparent 55%);
@@ -160,7 +160,7 @@ for(let i = 0; i < 30; i++){
       position: fixed;
       inset:0;
       pointer-events:none;
-      z-index:4;
+      z-index:-2;
       overflow:hidden;
       mix-blend-mode: screen;
     }
@@ -239,8 +239,7 @@ for(let i = 0; i < 30; i++){
       align-items:center;
       padding: 60px 18px;
       position: relative;
-      isolation:isolate;
-      z-index: 10;
+      z-index: 1;
     }
     .hero h1{
       font-size: clamp(3rem, 7vw, 6rem);
@@ -327,7 +326,6 @@ for(let i = 0; i < 30; i++){
       padding: 0 10px;
     }
 
-    /* Domains logo */
     .tld-logo{
       display:flex;
       align-items:baseline;
@@ -360,7 +358,6 @@ for(let i = 0; i < 30; i++){
       text-shadow: 0 0 28px rgba(0,243,255,.7), 0 0 90px rgba(0,243,255,.42);
     }
 
-    /* Prompt */
     .prompt-sky{
       position: relative;
       width: 150px;
@@ -406,7 +403,6 @@ for(let i = 0; i < 30; i++){
     }
     @keyframes blink{ 50%{ opacity:.2; } }
 
-    /* Code */
     .laptop{
       width: 130px;
       height: 90px;
@@ -468,7 +464,6 @@ for(let i = 0; i < 30; i++){
       max-width: 100%;
     }
 
-    /* Extension icon */
     .card-extension .ext-orb {
       position: relative;
       width: 84px;
@@ -563,7 +558,6 @@ for(let i = 0; i < 30; i++){
       transition: transform .25s ease, box-shadow .25s ease;
     }
 
-    /* Contact icon */
     .env-box{
       width: 76px;
       height: 56px;
@@ -581,8 +575,6 @@ for(let i = 0; i < 30; i++){
       transform: rotateX(0deg);
       transition: transform .55s ease;
     }
-
-    /* PANELS */
 
     .contact-panel{
       position: fixed;
@@ -766,8 +758,6 @@ for(let i = 0; i < 30; i++){
       background: rgba(0,0,0,.22);
     }
 
-    /* FOCUS */
-
     body.focus-domains .menu-card:not(.card-domains),
     body.focus-contact .menu-card:not(.card-contact){
       opacity: 0;
@@ -839,73 +829,6 @@ for(let i = 0; i < 30; i++){
       .domain-rise ul{ padding-inline:16px; }
     }
   </style>
-
-  <div class="bg-photo" id="bgPhoto"></div>
-  <div class="cyber-grid"></div>
-  <div class="bg-overlay"></div>
-  
-  <!-- Floating background text - Generated in HTML -->
-  <div class="bg-streams" id="bgStreams">
-    {bgChips.map((chip) => (
-      <span 
-        class={chip.className}
-        style={`left: ${chip.x}%; top: ${chip.y}%; animation-duration: ${chip.duration}s; animation-delay: ${-chip.delay}s;`}
-      >
-        {chip.text}
-      </span>
-    ))}
-  </div>
-
-  <aside class="domain-wall" id="domainWall" aria-hidden="true">
-    <div class="head">
-      <div class="ttl">Featured Domains</div>
-      <div class="hint">Hover → Click to open</div>
-    </div>
-    <div class="domain-rise" id="domainRise">
-      <ul id="domainRiseList">
-        {latestDomains.map((item) => (
-          <li>
-            <a href={`domains-details#${item.id}`} title={item.domain ?? item.name}>
-              {item.domain ?? item.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </aside>
-
-  <aside class="contact-panel" id="contactPanel" aria-hidden="true">
-    <div class="ttl">Contact</div>
-
-    <div class="contact-actions">
-      <a class="contact-pill pill-gmail" href="mailto:houssemkamas96@gmail.com">
-        <div class="pill-ico" title="Email">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 7.5V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V7.5" stroke="white" stroke-width="1.8" stroke-linecap="round" />
-            <path d="M4.2 7.4L12 13.2L19.8 7.4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M6 6.5H18" stroke="rgba(0,243,255,.9)" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <div class="pill-text">
-          <div class="k">Email</div>
-          <div class="v">houssemkamas96@gmail.com</div>
-        </div>
-      </a>
-
-      <a class="contact-pill pill-wa" href="https://wa.me/213781302576?text=Hello%20my%20friend%2C%0AIf%20you%20have%20any%20questions%2C%20I%27m%20here%20to%20help.%0AJust%20leave%20a%20message%20and%20I%27ll%20reply%20soon.%0AThank%20you%20for%20contacting%20me.%20Have%20a%20nice%20day%21" target="_blank" rel="noopener">
-        <div class="pill-ico" title="WhatsApp">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 20.5C16.7 20.5 20.5 16.7 20.5 12C20.5 7.3 16.7 3.5 12 3.5C7.3 3.5 3.5 7.3 3.5 12C3.5 13.4 3.8 14.7 4.4 15.9L3.5 20.5L8.2 19.6C9.3 20.2 10.6 20.5 12 20.5Z" stroke="white" stroke-width="1.8" stroke-linejoin="round" />
-            <path d="M9.3 9.2C9.6 8.7 10 8.7 10.4 8.7C10.7 8.7 11 8.7 11.2 9.1L11.8 10.3C12 10.7 11.9 11 11.6 11.3L11.2 11.7C11.7 12.8 12.6 13.6 13.7 14.1L14.1 13.7C14.4 13.4 14.7 13.3 15.1 13.5L16.4 14.1C16.8 14.3 16.8 14.7 16.8 15C16.8 15.6 16.3 16.1 15.7 16.3C15 16.6 13.9 16.5 12.3 15.7C10.8 15 9.4 13.6 8.7 12.1C7.9 10.5 7.8 9.4 8.1 8.7C8.3 8.1 8.8 7.6 9.3 7.6" stroke="rgba(0,255,136,.95)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
-        <div class="pill-text">
-          <div class="k">WhatsApp</div>
-          <div class="v">+213781302576</div>
-        </div>
-      </a>
-    </div>
-  </aside>
 
   <section class="hero">
     <h1>DOMIX</h1>
@@ -985,8 +908,72 @@ for(let i = 0; i < 30; i++){
     </div>
   </section>
 
+  <aside class="domain-wall" id="domainWall" aria-hidden="true">
+    <div class="head">
+      <div class="ttl">Featured Domains</div>
+      <div class="hint">Hover → Click to open</div>
+    </div>
+    <div class="domain-rise" id="domainRise">
+      <ul id="domainRiseList">
+        {latestDomains.map((item) => (
+          <li>
+            <a href={`domains-details#${item.id}`} title={item.domain ?? item.name}>
+              {item.domain ?? item.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </aside>
+
+  <aside class="contact-panel" id="contactPanel" aria-hidden="true">
+    <div class="ttl">Contact</div>
+    <div class="contact-actions">
+      <a class="contact-pill pill-gmail" href="mailto:houssemkamas96@gmail.com">
+        <div class="pill-ico" title="Email">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 7.5V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V7.5" stroke="white" stroke-width="1.8" stroke-linecap="round" />
+            <path d="M4.2 7.4L12 13.2L19.8 7.4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6 6.5H18" stroke="rgba(0,243,255,.9)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="pill-text">
+          <div class="k">Email</div>
+          <div class="v">houssemkamas96@gmail.com</div>
+        </div>
+      </a>
+      <a class="contact-pill pill-wa" href="https://wa.me/213781302576?text=Hello%20my%20friend%2C%0AIf%20you%20have%20any%20questions%2C%20I%27m%20here%20to%20help.%0AJust%20leave%20a%20message%20and%20I%27ll%20reply%20soon.%0AThank%20you%20for%20contacting%20me.%20Have%20a%20nice%20day%21" target="_blank" rel="noopener">
+        <div class="pill-ico" title="WhatsApp">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 20.5C16.7 20.5 20.5 16.7 20.5 12C20.5 7.3 16.7 3.5 12 3.5C7.3 3.5 3.5 7.3 3.5 12C3.5 13.4 3.8 14.7 4.4 15.9L3.5 20.5L8.2 19.6C9.3 20.2 10.6 20.5 12 20.5Z" stroke="white" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M9.3 9.2C9.6 8.7 10 8.7 10.4 8.7C10.7 8.7 11 8.7 11.2 9.1L11.8 10.3C12 10.7 11.9 11 11.6 11.3L11.2 11.7C11.7 12.8 12.6 13.6 13.7 14.1L14.1 13.7C14.4 13.4 14.7 13.3 15.1 13.5L16.4 14.1C16.8 14.3 16.8 14.7 16.8 15C16.8 15.6 16.3 16.1 15.7 16.3C15 16.6 13.9 16.5 12.3 15.7C10.8 15 9.4 13.6 8.7 12.1C7.9 10.5 7.8 9.4 8.1 8.7C8.3 8.1 8.8 7.6 9.3 7.6" stroke="rgba(0,255,136,.95)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="pill-text">
+          <div class="k">WhatsApp</div>
+          <div class="v">+213781302576</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Background layers at the END -->
+  <div class="bg-photo" id="bgPhoto"></div>
+  <div class="cyber-grid"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-streams">
+    {bgChips.map((chip) => (
+      <span 
+        class={chip.className}
+        style={`left: ${chip.x}%; top: ${chip.y}%; animation-duration: ${chip.duration}s; animation-delay: ${-chip.delay}s;`}
+      >
+        {chip.text}
+      </span>
+    ))}
+  </div>
+
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('load', function() {
       const tlds = ["com","net","org","xyz"];
       const tldExtEl = document.getElementById("tldExt");
       let tldIndex = 0;
@@ -1003,7 +990,6 @@ for(let i = 0; i < 30; i++){
 
       const listEl = document.getElementById("domainRiseList");
       const riseEl = document.getElementById("domainRise");
-
       let autoY = 0;
       let autoSpeed = 0.35;
       let autoPaused = false;
@@ -1018,13 +1004,9 @@ for(let i = 0; i < 30; i++){
         }
       };
 
-      function measureHeights(){
-        contentHeightInit();
-      }
-      
       if(listEl && riseEl){
-        measureHeights();
-        window.addEventListener("resize", measureHeights);
+        contentHeightInit();
+        window.addEventListener("resize", contentHeightInit);
 
         function rafLoop(timestamp){
           if (!lastTime) lastTime = timestamp;
@@ -1127,7 +1109,6 @@ for(let i = 0; i < 30; i++){
         };
         type();
       }
-      
       if(promptFloat) runPrompt();
 
       const codeTypingEl = document.getElementById("codeTyping");
@@ -1160,7 +1141,6 @@ for(let i = 0; i < 30; i++){
           }, 700);
         }
       }
-      
       if(codeTypingEl) typeLoop();
 
       const cardDomains = document.getElementById("cardDomains");
@@ -1182,16 +1162,14 @@ for(let i = 0; i < 30; i++){
         cardDomains.addEventListener("mouseenter", () => {
           resetAll();
           document.body.classList.add("focus-domains");
-
           timers.push(setTimeout(() => {
             document.body.classList.add("domains-panel-on");
             const domainWall = document.getElementById("domainWall");
             if(domainWall) domainWall.setAttribute("aria-hidden","false");
           }, 240));
-
           timers.push(setTimeout(() => {
             document.body.classList.add("domains-rise-on");
-          }, 240 + 180));
+          }, 420));
         });
       }
 
@@ -1199,7 +1177,6 @@ for(let i = 0; i < 30; i++){
         cardContact.addEventListener("mouseenter", () => {
           resetAll();
           document.body.classList.add("focus-contact");
-
           timers.push(setTimeout(() => {
             document.body.classList.add("contact-panel-on");
             const contactPanel = document.getElementById("contactPanel");
