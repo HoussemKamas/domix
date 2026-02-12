@@ -251,7 +251,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       cursor:pointer;
       position:relative;
       overflow:hidden;
-      transition: transform .35s ease, box-shadow .35s.ease, border-color .35s.ease, opacity .2s.ease;
+      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .2s.ease;
       backdrop-filter: blur(6px);
       user-select:none;
     }
@@ -332,7 +332,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       align-items:center;
       justify-content:center;
       box-shadow: 0 0 18px rgba(0,0,0,.6);
-      transition: box-shadow .25s.ease, border-color .25s.ease;
+      transition: box-shadow .25s ease, border-color .25s ease;
     }
     .card-prompts:hover .prompt-sky{
       border-color: rgba(188,19,254,.35);
@@ -375,7 +375,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       z-index:2;
       overflow:hidden;
       box-shadow: 0 0 18px rgba(0,0,0,.6);
-      transition: box-shadow .25s.ease, border-color .25s.ease;
+      transition: box-shadow .25s ease, border-color .25s ease;
     }
     .card-code:hover .laptop{
       border-color: rgba(0,255,136,.35);
@@ -432,7 +432,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       height: 56px;
       z-index: 2;
       filter: drop-shadow(0 14px 22px rgba(0,0,0,.25));
-      transition: filter .25s.ease;
+      transition: filter .25s ease;
     }
     .card-contact:hover .env-box{
       filter: drop-shadow(0 0 22px rgba(255,157,0,.25)) drop-shadow(0 0 70px rgba(255,157,0,.18));
@@ -467,7 +467,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       z-index: 95;
       opacity: 0;
       pointer-events: none;
-      transition: opacity .22s.ease, transform .22s.ease;
+      transition: opacity .22s ease, transform .22s ease;
     }
     .contact-panel .ttl{
       font-weight: 950;
@@ -766,8 +766,9 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       box-shadow:
         0 0 16px rgba(0,243,255,.55),
         0 0 30px rgba(0,255,136,.45);
+      /* شكل قطعة puzzle يرمز لإضافات المتصفح */
       clip-path: path("M6 0 H18 Q22 0 22 4 V8 Q26 8 26 12 Q26 16 22 16 V20 Q22 24 18 24 H6 Q2 24 2 20 V16 Q-2 16 -2 12 Q-2 8 2 8 V4 Q2 0 6 0 Z");
-      animation: extFloat 2.4s.ease-in-out infinite;
+      animation: extFloat 2.4s ease-in-out infinite;
     }
 
     .card-extension .ext-plus {
@@ -792,7 +793,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         0 0 30px rgba(0,243,255,.7),
         0 0 80px rgba(188,19,254,.65);
       transform: translateY(-4px);
-      transition: transform .25s.ease, box-shadow .25s.ease;
+      transition: transform .25s ease, box-shadow .25s ease;
     }
     /* ===== نهاية ستايل extension ===== */
   </style>
@@ -833,7 +834,22 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       <!-- Email: mailto opens user's email client with your address -->
       <a class="contact-pill pill-gmail" href="mailto:houssemkamas96@gmail.com">
         <div class="pill-ico" title="Email">
-          <!-- SVG email هنا كما في كودك -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M4 7.5V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V7.5"
+              stroke="white"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+            <path
+              d="M4.2 7.4L12 13.2L19.8 7.4"
+              stroke="white"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path d="M6 6.5H18" stroke="rgba(0,243,255,.9)" stroke-width="2" stroke-linecap="round" />
+          </svg>
         </div>
         <div class="pill-text">
           <div class="k">Email</div>
@@ -849,7 +865,21 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         rel="noopener"
       >
         <div class="pill-ico" title="WhatsApp">
-          <!-- SVG whatsapp هنا كما في كودك -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12 20.5C16.7 20.5 20.5 16.7 20.5 12C20.5 7.3 16.7 3.5 12 3.5C7.3 3.5 3.5 7.3 3.5 12C3.5 13.4 3.8 14.7 4.4 15.9L3.5 20.5L8.2 19.6C9.3 20.2 10.6 20.5 12 20.5Z"
+              stroke="white"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9.3 9.2C9.6 8.7 10 8.7 10.4 8.7C10.7 8.7 11 8.7 11.2 9.1L11.8 10.3C12 10.7 11.9 11 11.6 11.3L11.2 11.7C11.7 12.8 12.6 13.6 13.7 14.1L14.1 13.7C14.4 13.4 14.7 13.3 15.1 13.5L16.4 14.1C16.8 14.3 16.8 14.7 16.8 15C16.8 15.6 16.3 16.1 15.7 16.3C15 16.6 13.9 16.5 12.3 15.7C10.8 15 9.4 13.6 8.7 12.1C7.9 10.5 7.8 9.4 8.1 8.7C8.3 8.1 8.8 7.6 9.3 7.6"
+              stroke="rgba(0,255,136,.95)"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
         </div>
         <div class="pill-text">
           <div class="k">WhatsApp</div>
@@ -917,7 +947,23 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         <!-- Contact -->
         <div class="menu-card card-contact" id="cardContact">
           <div class="env-box">
-            <!-- SVG الظرف كما في كودك -->
+            <svg class="env-svg" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="paper" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ffffff" />
+                  <stop offset="1" stop-color="#f1f1f1" />
+                </linearGradient>
+              </defs>
+              <rect x="10" y="18" width="100" height="60" rx="14" fill="url(#paper)" />
+              <path d="M18 26 L60 52 L102 26" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="3" />
+              <g class="env-flap">
+                <path d="M12 22 Q60 6 108 22 L60 54 Z" fill="#ffffff" stroke="rgba(0,0,0,0.08)" stroke-width="2" />
+              </g>
+              <path d="M12 76 L60 48 L108 76" fill="#f6f6f6" stroke="rgba(0,0,0,0.08)" stroke-width="2" />
+              <circle cx="78" cy="64" r="10" fill="#b30000" opacity="0.95" />
+              <circle cx="78" cy="64" r="6" fill="#d10000" opacity="0.85" />
+              <path d="M75 64 L78 61 L81 64 L78 67 Z" fill="#ffdddd" opacity="0.75" />
+            </svg>
           </div>
           <h3>Contact</h3>
           <div class="sub">Reach out fast</div>
@@ -1181,23 +1227,16 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       if (!inside) resetAll();
     });
 
-    // click routes (تعديل الروابط فقط: إزالة / من البداية)
-    document.getElementById("cardPrompts").addEventListener("click", () => {
-      window.location.href = "prompts/";
-    });
-
-    document.getElementById("cardCode").addEventListener("click", () => {
-      window.location.href = "code/";
-    });
-
-    cardDomains.addEventListener("click", () => {
-      window.location.href = "domains/";
-    });
+    // click routes (updated to relative paths)
+    document.getElementById("cardPrompts").addEventListener("click", () => window.location.href = "prompts/");
+    document.getElementById("cardCode").addEventListener("click", () => window.location.href = "code/");
+    cardDomains.addEventListener("click", () => window.location.href = "domains/");
 
     // Extension card click route
     const cardExtension = document.getElementById("cardExtension");
     if (cardExtension){
       cardExtension.addEventListener("click", () => {
+        // عدّل هذا الرابط لرابط الإضافة الحقيقي (Chrome/Edge/Firefox أو صفحة تعريف)
         window.location.href = "extension/";
       });
     }
