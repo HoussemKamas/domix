@@ -89,22 +89,21 @@ const paidPriceLabel = paidPriceNum ? `$${paidPriceNum}` : '$9';
 
   <main class="wrap">
     <div class="topbar">
-      <div class="crumbs">
-        <a href="/">Home</a>
-        <span class="slash">/</span>
-        <a href="/prompts">Prompts</a>
-        <span class="slash">/</span>
-        <span
-          id="crumbName"
-          data-free={freeItem.title ?? 'Free Prompt'}
-          data-paid={paidItem.title ?? 'Paid Prompt'}
+      <a href="/prompts" class="back-btn">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          {freeItem.title ?? 'Prompt Details'}
-        </span>
-      </div>
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Prompts
+      </a>
 
       <div class="actions">
-        <a class="btn" href="/prompts">← All Prompts</a>
         <a class="btn" href="#free">Free Preview</a>
         <a class="btn" href="#paid">Paid Preview</a>
       </div>
@@ -402,29 +401,44 @@ Add a CTA asking for a quick reply.`}
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom: 18px;
+      gap:16px;
+      margin-bottom: 24px;
+      flex-wrap:wrap;
     }
 
-    .crumbs{
-      display:flex;
+    .back-btn{
+      text-decoration:none;
+      color: rgba(255,255,255,.92);
+      font-weight:700;
+      font-size:.95rem;
+      display:inline-flex;
       align-items:center;
       gap:10px;
-      flex-wrap:wrap;
-      color: rgba(255,255,255,.86);
-      font-size:.94rem;
-      letter-spacing:.2px;
+      padding: 11px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.16);
+      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
     }
-    .crumbs a{
-      color: rgba(255,255,255,.92);
-      text-decoration:none;
-      border-bottom: 1px solid rgba(255,255,255,.18);
-      padding-bottom: 2px;
+    .back-btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(188,19,254,.38);
+      box-shadow: 0 0 44px rgba(188,19,254,.14), 0 10px 30px rgba(0,0,0,.20);
+      background: rgba(255,255,255,.10);
+      color: #fff;
     }
-    .crumbs a:hover{ border-bottom-color: rgba(188,19,254,.45); }
-    .slash{ opacity:.55; }
+    .back-btn svg{
+      flex-shrink:0;
+    }
 
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
     .btn{
       border:1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.07);
@@ -437,7 +451,8 @@ Add a CTA asking for a quick reply.`}
       gap:10px;
       backdrop-filter: blur(14px);
       box-shadow: 0 10px 30px rgba(0,0,0,.16);
-      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s.ease;
+      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      font-size:.92rem;
     }
     .btn:hover{
       transform: translateY(-2px);
@@ -660,7 +675,7 @@ Add a CTA asking for a quick reply.`}
       display:flex;
       align-items:center;
       gap: 12px;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s.ease;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
       backdrop-filter: blur(14px);
     }
     .buyBtn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.085); }
@@ -702,13 +717,6 @@ Add a CTA asking for a quick reply.`}
       paid.classList.remove("active");
       const isPaid = (h === "#paid");
       (isPaid ? paid : free).classList.add("active");
-
-      const crumb = document.getElementById("crumbName");
-      if (crumb){
-        const freeName = crumb.dataset.free || "Free Prompt";
-        const paidName = crumb.dataset.paid || "Paid Prompt";
-        crumb.textContent = isPaid ? paidName : freeName;
-      }
     }
     window.addEventListener("hashchange", renderPanel);
     renderPanel();
