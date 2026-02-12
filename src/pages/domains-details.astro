@@ -70,7 +70,7 @@ const allDomains = [...(data.domains ?? [])];
   >
     <!-- Navigation -->
     <nav class="top-nav">
-      <a href="/domains" class="back-btn">
+      <a href="#" id="backBtn" class="back-btn">
         <svg
           width="20"
           height="20"
@@ -298,6 +298,7 @@ const allDomains = [...(data.domains ?? [])];
     }
     .desc-text{
       line-height: 1.7; color: rgba(255,255,255,.85); font-size: 1.05rem;
+      white-space: pre-line;
     }
 
     .side-col{ position:sticky; top: 30px; }
@@ -513,5 +514,18 @@ const allDomains = [...(data.domains ?? [])];
         initParticles();
       });
     })();
+
+    // ====== 3. زر Back مع History ======
+    var backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = '/domains';
+        }
+      });
+    }
   </script>
 </Layout>
