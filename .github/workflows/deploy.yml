@@ -1,0 +1,38 @@
+name: Deploy to GitHub Pages
+
+on:
+  # تشغيل النشر عند كل دفع (push) إلى الفرع main
+  push:
+    branches: [main]
+  # للسماح بتشغيل الـ workflow يدويًا من تبويب Actions
+  workflow_dispatch:
+
+# التصاريح اللازمة للنشر على GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v4
+      - name: Install, build, and upload your site output
+        uses: withastro/action@v4
+        # with:
+            # path: . # مسار مشروع Astro داخل الريبو (اتركها كما هي لأن مشروعك في الجذر)
+            # node-version: 22 # نسخة Node (الافتراضية 22 مناسبة)
+            # package-manager: npm # أو yarn / pnpm / bun إن كنت تستخدمها
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
