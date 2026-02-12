@@ -55,15 +55,35 @@ const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
 
   <main class="page">
     <header class="page-head">
-      <div class="badge-top">
-        <span class="badge-dot"></span>
-        <span>Browser extensions hub</span>
+      <div class="head-row">
+        <div>
+          <div class="badge-top">
+            <span class="badge-dot"></span>
+            <span>Browser extensions hub</span>
+          </div>
+          <h1>DOMIX Extensions</h1>
+          <p class="lead">
+            Discover DOMIX browser extensions to generate leads, protect focus, and
+            automate your daily workflow.
+          </p>
+        </div>
+        
+        <div class="actions">
+          <a class="btn-back" href="/">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Home
+          </a>
+        </div>
       </div>
-      <h1>DOMIX Extensions</h1>
-      <p class="lead">
-        Discover DOMIX browser extensions to generate leads, protect focus, and
-        automate your daily workflow.
-      </p>
     </header>
 
     {allExtensions.length === 0 ? (
@@ -214,12 +234,17 @@ const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
     }
 
     header.page-head{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      align-items:flex-start;
       margin-bottom:32px;
     }
+
+    .head-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+
     .badge-top{
       display:inline-flex;
       align-items:center;
@@ -232,6 +257,7 @@ const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
       text-transform:uppercase;
       letter-spacing:.16em;
       color:var(--text-dim);
+      margin-bottom:10px;
     }
     .badge-dot{
       width:9px;
@@ -246,12 +272,58 @@ const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
       letter-spacing:4px;
       text-transform:uppercase;
       text-shadow:0 0 22px rgba(255,255,255,.28);
+      margin:0 0 10px 0;
     }
     .lead{
       max-width:620px;
       color:var(--text-dim);
       line-height:1.6;
       font-size:.98rem;
+      margin:0;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-shrink:0;
+      align-items:flex-start;
+    }
+
+    .btn-back{
+      text-decoration:none;
+      color: var(--neon-blue);
+      font-weight:700;
+      font-size:.95rem;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,243,255,.25);
+      background: rgba(0,243,255,.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 
+        0 0 18px rgba(0,243,255,.12),
+        0 10px 24px rgba(0,0,0,.6);
+      transition: all .22s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-back:hover{
+      transform: translateY(-2px);
+      background: var(--neon-blue);
+      color: #000;
+      border-color: var(--neon-blue);
+      box-shadow: 
+        0 0 28px rgba(0,243,255,.55),
+        0 12px 28px rgba(0,0,0,.7);
+    }
+    .btn-back svg{
+      flex-shrink:0;
+      transition: transform .2s ease;
+    }
+    .btn-back:hover svg{
+      transform: translateX(-3px);
     }
 
     .extensions-grid{
@@ -321,6 +393,16 @@ const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
     .ext-price.paid{
       color:var(--neon-orange);
       text-shadow:0 0 10px rgba(255,157,0,.4);
+    }
+
+    @media (max-width: 768px){
+      .head-row{
+        flex-direction:column;
+      }
+      .actions{
+        width:100%;
+        justify-content:flex-start;
+      }
     }
   </style>
 
