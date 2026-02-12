@@ -2,25 +2,71 @@
   "domains": [
     {
       "id": "1",
-      "domain": "example.com",
-      "name": "example.com",
-      "price": 500,
-      "niche": "Tech",
+      "domain": "BostonCPAFirm.com",
+      "name": "BostonCPAFirm.com",
+      "price": 2500,
+      "niche": "Finance & Accounting",
       "status": "Available",
-      "description": "Short, memorable domain in the tech niche.",
+      "description": "Premium domain for CPA firms in Boston. Instant local authority and trust.",
       "logo": "/images/domain-placeholder.jpg",
-      "image": "/images/domain-placeholder.jpg"
+      "image": "/photo/BostonCPAFirm.png"
+    },
+    {
+      "id": "2",
+      "domain": "HomebuyersDubai.com",
+      "name": "HomebuyersDubai.com",
+      "price": 3200,
+      "niche": "Real Estate",
+      "status": "Available",
+      "description": "Perfect for Dubai real estate agents targeting international homebuyers.",
+      "logo": "/images/domain-placeholder.jpg",
+      "image": "/photo/HomebuyersDubai.png"
+    },
+    {
+      "id": "3",
+      "domain": "TopRealtorOrlando.com",
+      "name": "TopRealtorOrlando.com",
+      "price": 1800,
+      "niche": "Real Estate",
+      "status": "Available",
+      "description": "Dominate Orlando real estate market with this premium domain.",
+      "logo": "/images/domain-placeholder.jpg",
+      "image": "/photo/TopRealtorOrlando.png"
     }
   ],
 
   "prompts": [
     {
       "id": "1",
+      "title": "Lead Generation Message",
+      "type": "ChatGPT",
+      "price": 0,
+      "is_free": true,
+      "description": "A powerful WhatsApp message template for generating leads in any niche.",
+      "prompt_text": "You are a marketing assistant. Write a short WhatsApp message for {niche}. Goal: generate a lead. Tone: friendly, confident. Add a CTA.",
+      "image": "/images/prompt-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    },
+    {
+      "id": "2",
+      "title": "Clinic Appointment Booking",
+      "type": "ChatGPT",
+      "price": 9,
+      "is_free": false,
+      "description": "Conversion-focused prompt for clinics to book appointments via WhatsApp.",
+      "prompt_text": "",
+      "image": "/images/prompt-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    },
+    {
+      "id": "3",
       "title": "Neon City Portrait",
       "type": "Midjourney",
       "price": 5,
       "is_free": false,
-      "description": "A high quality prompt for cyberpunk style.",
+      "description": "High-quality cyberpunk portrait prompt for Midjourney.",
       "prompt_text": "",
       "image": "/images/prompt-placeholder.jpg",
       "gallery": [],
@@ -31,11 +77,35 @@
   "code": [
     {
       "id": "1",
+      "title": "UTM Builder",
+      "language": "JavaScript",
+      "price": 0,
+      "is_free": true,
+      "description": "Build URLs with UTM parameters for campaign tracking.",
+      "code_content": "function buildUTM(url, source, medium, campaign) {\n  return `${url}?utm_source=${source}&utm_medium=${medium}&utm_campaign=${campaign}`;\n}",
+      "image": "/images/code-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    },
+    {
+      "id": "2",
       "title": "Python Email Scraper",
       "language": "Python",
       "price": 20,
       "is_free": false,
-      "description": "Automated script to extract emails.",
+      "description": "Automated script to extract emails from websites with retry logic.",
+      "code_content": "",
+      "image": "/images/code-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    },
+    {
+      "id": "3",
+      "title": "Lead Gen Automation",
+      "language": "Python",
+      "price": 35,
+      "is_free": false,
+      "description": "Complete lead generation pipeline with Apollo.io integration.",
       "code_content": "",
       "image": "/images/code-placeholder.jpg",
       "gallery": [],
@@ -55,6 +125,18 @@
       "logo": "/uploads/focus-guard-cover.png",
       "video": "/uploads/focus-guard-demo.mp4",
       "download_url": "/uploads/focus-guard.zip"
+    },
+    {
+      "id": "ext_2",
+      "title": "Lead Clipper",
+      "name": "Lead Clipper",
+      "category": "Sales Tools",
+      "price": 12,
+      "is_free": false,
+      "description": "Capture lead data from any webpage with one click. Automatically extracts emails, phone numbers, and company info.",
+      "logo": "/images/extension-placeholder.png",
+      "video": "",
+      "download_url": ""
     }
   ]
 }
