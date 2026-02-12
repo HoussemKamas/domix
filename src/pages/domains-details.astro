@@ -374,7 +374,7 @@ const allDomains = [...(data.domains ?? [])];
       return String(p);
     }
 
-    // بناء رابط واتساب بدون template literals
+    // بناء رابط واتساب
     var phone = '213781302576';
     function buildWhatsApp(title, price) {
       var msg = 'DOMIX Domain Inquiry - ' + title + ' - ' + price;
@@ -445,7 +445,7 @@ const allDomains = [...(data.domains ?? [])];
     window.addEventListener('load', updateDomainDetails);
     window.addEventListener('hashchange', updateDomainDetails);
 
-    // ====== 2. خلفية الجزيئات (Particles) بدون backticks ======
+    // ====== 2. خلفية الجزيئات (Particles) ======
     (function () {
       var canvas = document.getElementById('particles');
       if (!canvas) return;
