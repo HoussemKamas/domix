@@ -151,7 +151,7 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
       filter: blur(30px);
       opacity:.9;
       mix-blend-mode: screen;
-      animation: auroraMove 16s.ease-in-out infinite;
+      animation: auroraMove 16s ease-in-out infinite;
       background:
         radial-gradient(600px 400px at 20% 30%, rgba(120,100,255,.22), transparent 60%),
         radial-gradient(520px 420px at 75% 35%, rgba(0,210,255,.18), transparent 62%),
@@ -215,7 +215,7 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
       gap:10px;
       backdrop-filter: blur(12px);
       box-shadow: 0 16px 40px rgba(0,0,0,.25);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s.ease;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
       user-select:none;
       cursor:pointer;
     }
@@ -243,7 +243,7 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
       padding: 0;
       overflow:hidden;
       box-shadow: 0 18px 55px rgba(0,0,0,.28);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s.ease;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
     .card:hover{
       transform: translateY(-6px);
@@ -326,10 +326,25 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
   </style>
 
   <script>
-    // تفعيل/إلغاء الـ Favorite على القلوب
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.fav').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
+    // ====== Auto-redirect من index.astro ======
+    (function() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var gotoId = urlParams.get('goto');
+      
+      if (gotoId) {
+        // إزالة الـ query parameter من الـ URL
+        var cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+        // التوجيه إلى domains-details
+        window.location.href = '/domains-details#' + gotoId;
+      }
+    })();
+
+    // ====== تفعيل/إلغاء الـ Favorite على القلوب ======
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.fav').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
           btn.classList.toggle('is-on');
@@ -337,13 +352,13 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
       });
     });
 
-    // خلفية الـ particles
-    const canvas = document.getElementById('particles');
+    // ====== خلفية الـ particles ======
+    var canvas = document.getElementById('particles');
     if (canvas) {
-      const ctx = canvas.getContext('2d', { alpha: true });
+      var ctx = canvas.getContext('2d', { alpha: true });
 
       function fit() {
-        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
         canvas._dpr = dpr;
         canvas.width = Math.floor(innerWidth * dpr);
         canvas.height = Math.floor(innerHeight * dpr);
@@ -351,15 +366,15 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
         canvas.style.height = innerHeight + 'px';
       }
 
-      const dots = [];
+      var dots = [];
       function seed() {
         dots.length = 0;
-        const dpr = canvas._dpr || 1;
-        const w = canvas.width;
-        const h = canvas.height;
+        var dpr = canvas._dpr || 1;
+        var w = canvas.width;
+        var h = canvas.height;
 
-        const count = Math.floor((w * h) / (dpr * dpr) / 12000);
-        for (let i = 0; i < count; i++) {
+        var count = Math.floor((w * h) / (dpr * dpr) / 12000);
+        for (var i = 0; i < count; i++) {
           dots.push({
             x: Math.random() * w,
             y: Math.random() * h,
@@ -373,15 +388,16 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
         }
       }
 
-      let raf;
+      var raf;
       function draw() {
-        const w = canvas.width;
-        const h = canvas.height;
-        const dpr = canvas._dpr || 1;
+        var w = canvas.width;
+        var h = canvas.height;
+        var dpr = canvas._dpr || 1;
 
         ctx.clearRect(0, 0, w, h);
 
-        for (const p of dots) {
+        for (var j = 0; j < dots.length; j++) {
+          var p = dots[j];
           p.ph += p.tw;
           p.x += p.vx;
           p.y += p.vy;
@@ -391,10 +407,10 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
           if (p.y > h + 40 * dpr) p.y = -40 * dpr;
           if (p.y < -40 * dpr) p.y = h + 40 * dpr;
 
-          const alpha = p.a + Math.sin(p.ph) * 0.18;
+          var alpha = p.a + Math.sin(p.ph) * 0.18;
 
           ctx.beginPath();
-          ctx.fillStyle = `rgba(255,255,255,${Math.max(0, Math.min(0.85, alpha))})`;
+          ctx.fillStyle = 'rgba(255,255,255,' + Math.max(0, Math.min(0.85, alpha)) + ')';
           ctx.shadowBlur = 18 * dpr;
           ctx.shadowColor = 'rgba(255,255,255,0.30)';
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -403,15 +419,15 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
 
         ctx.shadowBlur = 0;
         ctx.lineWidth = 1 * dpr;
-        for (let i = 0; i < dots.length; i += 4) {
-          const a = dots[i];
-          const b = dots[(i + 7) % dots.length];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.hypot(dx, dy);
+        for (var i = 0; i < dots.length; i += 4) {
+          var a = dots[i];
+          var b = dots[(i + 7) % dots.length];
+          var dx = a.x - b.x;
+          var dy = a.y - b.y;
+          var dist = Math.hypot(dx, dy);
           if (dist < 180 * dpr) {
-            const k = 1 - dist / (180 * dpr);
-            ctx.strokeStyle = `rgba(255,255,255,${0.06 * k})`;
+            var k = 1 - dist / (180 * dpr);
+            ctx.strokeStyle = 'rgba(255,255,255,' + (0.06 * k) + ')';
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -426,10 +442,10 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
       seed();
       draw();
 
-      let timer;
-      addEventListener('resize', () => {
+      var timer;
+      addEventListener('resize', function() {
         clearTimeout(timer);
-        timer = window.setTimeout(() => {
+        timer = window.setTimeout(function() {
           cancelAnimationFrame(raf);
           fit();
           seed();
