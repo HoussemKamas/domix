@@ -85,22 +85,21 @@ const paidPriceLabel = paidPriceNum ? `$${paidPriceNum}` : 'Price';
 
   <main class="wrap">
     <div class="topbar">
-      <div class="crumbs">
-        <a href="/">Home</a>
-        <span class="slash">/</span>
-        <a href="/code">Code</a>
-        <span class="slash">/</span>
-        <span
-          id="crumbName"
-          data-free={freeItem.title ?? 'Free code'}
-          data-paid={paidItem.title ?? 'Paid code'}
+      <a href="/code" class="back-btn">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          {freeItem.title ?? 'Free code'}
-        </span>
-      </div>
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Code
+      </a>
 
       <div class="actions">
-        <a class="btn" href="/code">← ALL CODE</a>
         <a class="btn" href="#free">FREE PREVIEW</a>
         <a class="btn" href="#paid">PAID PREVIEW</a>
       </div>
@@ -448,30 +447,50 @@ function example() {
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom: 16px;
+      gap:16px;
+      margin-bottom: 20px;
       flex-wrap:wrap;
     }
 
-    .crumbs{
-      display:flex;
+    .back-btn{
+      text-decoration:none;
+      color: var(--green);
+      font-weight:900;
+      font-size:.95rem;
+      display:inline-flex;
       align-items:center;
       gap:10px;
-      flex-wrap:wrap;
-      font-size:.94rem;
-      letter-spacing:.2px;
-      color: rgba(224,255,224,.92);
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,20,10,.45);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+      transition: all .18s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .crumbs a{
-      color: rgba(224,255,224,.92);
-      text-decoration:none;
-      border-bottom: 1px solid rgba(0,255,136,.18);
-      padding-bottom: 2px;
+    .back-btn:hover{
+      transform: translateY(-2px);
+      background: var(--green);
+      color: #000;
+      border-color: var(--green);
+      box-shadow: 0 0 28px var(--glow), 0 10px 26px rgba(0,0,0,.28);
     }
-    .crumbs a:hover{ border-bottom-color: rgba(0,255,136,.55); }
-    .slash{ opacity:.55; }
+    .back-btn svg{
+      flex-shrink:0;
+      transition: transform .2s ease;
+    }
+    .back-btn:hover svg{
+      transform: translateX(-3px);
+    }
 
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .actions{ 
+      display:flex; 
+      gap:10px; 
+      flex-wrap:wrap; 
+      justify-content:flex-end;
+    }
 
     .btn{
       border:1px solid var(--border);
@@ -712,7 +731,7 @@ function example() {
       display:flex;
       align-items:center;
       gap: 12px;
-      transition: transform .18s ease, box-shadow .18s.ease, border-color .18s.ease, background .18s.ease;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
       backdrop-filter: blur(10px);
     }
     .buyBtn:hover{
@@ -728,7 +747,7 @@ function example() {
       background: rgba(0,0,0,.20);
       box-shadow: 0 0 20px rgba(0,255,136,.10);
       font-size: 16px;
-      flex: 0 0.auto;
+      flex: 0 0 auto;
     }
     .hint{
       margin-top: 10px;
@@ -752,13 +771,6 @@ function example() {
 
       const isPaid = h === '#paid';
       (isPaid ? paid : free).classList.add('active');
-
-      const crumb = document.getElementById('crumbName');
-      if (crumb) {
-        const freeName = crumb.dataset.free || 'Free code';
-        const paidName = crumb.dataset.paid || 'Paid code';
-        crumb.textContent = isPaid ? paidName : freeName;
-      }
     }
     window.addEventListener('hashchange', renderPanel);
     renderPanel();
