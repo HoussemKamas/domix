@@ -68,13 +68,15 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       color:#fff;
       overflow-x:hidden;
       transition: background .45s ease;
+      position: relative;
+      min-height: 100vh;
     }
 
     /* background image per domain */
     .bg-photo{
       position: fixed;
       inset:0;
-      z-index:-5;
+      z-index:1;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -96,12 +98,13 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
       background-size: 52px 52px;
-      z-index:-3;
+      z-index:2;
       perspective: 600px;
       transform-style: preserve-3d;
       animation: gridMove 18s linear infinite;
       opacity: .9;
       transition: opacity .35s ease;
+      pointer-events: none;
     }
     @keyframes gridMove{
       0% { transform: translateY(0) rotateX(18deg); }
@@ -112,7 +115,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     .bg-overlay{
       position: fixed;
       inset:0;
-      z-index:-4;
+      z-index:3;
       pointer-events:none;
       transition: .45s ease;
       background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.04), transparent 55%);
@@ -123,7 +126,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       position: fixed;
       inset:0;
       pointer-events:none;
-      z-index:-2;
+      z-index:4;
       overflow:hidden;
       mix-blend-mode: screen;
     }
@@ -202,6 +205,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       padding: 60px 18px;
       position: relative;
       isolation:isolate;
+      z-index: 10;
     }
     .hero h1{
       font-size: clamp(3rem, 7vw, 6rem);
@@ -254,7 +258,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       cursor:pointer;
       position:relative;
       overflow:hidden;
-      transition: transform .35s ease, box-shadow .35s.ease, border-color .35s ease, opacity .2s ease;
+      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .2s ease;
       backdrop-filter: blur(6px);
       user-select:none;
     }
@@ -303,7 +307,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       background: rgba(0,0,0,.18);
       border: 1px solid rgba(255,255,255,.10);
       box-shadow: 0 0 18px rgba(0,0,0,.6);
-      transition: box-shadow .25s.ease, border-color .25s.ease;
+      transition: box-shadow .25s ease, border-color .25s ease;
     }
     .tld-dot{ color:#fff; opacity:.95; transform: translateY(-1px); }
     .tld-ext{
@@ -311,7 +315,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       text-shadow: 0 0 18px rgba(0,243,255,.35);
       min-width: 4ch;
       display:inline-block;
-      transition: opacity .2s ease, text-shadow .25s.ease;
+      transition: opacity .2s ease, text-shadow .25s ease;
     }
     .card-domains:hover .tld-logo{
       border-color: rgba(0,243,255,.35);
@@ -592,7 +596,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       text-decoration:none;
       color:#fff;
       min-height: 58px;
-      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s.ease;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
     .contact-pill:hover{
       transform: translateY(-2px);
@@ -656,7 +660,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       z-index: 90;
       opacity: 0;
       pointer-events: none;
-      transition: opacity .22s ease, transform .22s.ease;
+      transition: opacity .22s ease, transform .22s ease;
     }
     .domain-wall .head{
       display:flex;
@@ -714,7 +718,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       background: rgba(0,0,0,.18);
       border: 1px solid rgba(255,255,255,.08);
       text-shadow: 0 0 22px rgba(0,243,255,.14);
-      transition: transform .18s.ease, text-shadow .18s.ease, box-shadow .18s.ease, background .18s.ease;
+      transition: transform .18s ease, text-shadow .18s ease, box-shadow .18s ease, background .18s ease;
       white-space: nowrap;
       overflow:hidden;
       text-overflow: ellipsis;
@@ -738,7 +742,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
 
     body.focus-domains #cardDomains,
     body.focus-contact #cardContact{
-      transition: transform var(--moveDur).ease, box-shadow .35s.ease, border-color .35s.ease, opacity .2s ease;
+      transition: transform var(--moveDur) ease, box-shadow .35s ease, border-color .35s ease, opacity .2s ease;
       z-index: 110;
     }
 
@@ -801,13 +805,16 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     }
   </style>
 
-  <!-- photo layer controlled by hovered domain -->
+  <!-- photo layer -->
   <div class="bg-photo" id="bgPhoto"></div>
 
+  <!-- grid background -->
   <div class="cyber-grid"></div>
+
+  <!-- light overlay -->
   <div class="bg-overlay"></div>
 
-  <!-- floating background -->
+  <!-- floating background text -->
   <div class="bg-streams" id="bgStreams"></div>
 
   <!-- Domains panel -->
@@ -820,7 +827,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href={`/domains-details#${item.id}`} title={item.domain ?? item.name}>
+            <a href={`domains-details#${item.id}`} title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
@@ -896,7 +903,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
 
     <div class="stage" id="stage">
       <div class="menu-container" id="menuContainer">
-        <!-- Domains -->
         <div class="menu-card card-domains" id="cardDomains">
           <div class="tld-logo">
             <span class="tld-dot">.</span><span class="tld-ext" id="tldExt">com</span>
@@ -905,7 +911,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Browse brand-ready names</div>
         </div>
 
-        <!-- Prompts -->
         <div class="menu-card card-prompts" id="cardPrompts">
           <div class="prompt-sky">
             <div class="prompt-float" id="promptFloat"></div>
@@ -914,7 +919,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Ready-to-use ideas</div>
         </div>
 
-        <!-- Code -->
         <div class="menu-card card-code" id="cardCode">
           <div class="laptop">
             <div class="screen">
@@ -925,7 +929,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Snippets & templates</div>
         </div>
 
-        <!-- Extension -->
         <div class="menu-card card-extension" id="cardExtension">
           <div class="ext-orb">
             <div class="ext-window">
@@ -945,7 +948,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Browser add-on</div>
         </div>
 
-        <!-- Contact -->
         <div class="menu-card card-contact" id="cardContact">
           <div class="env-box">
             <svg class="env-svg" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -974,294 +976,285 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
   </section>
 
   <script>
-    // TLD animation
-    const tlds = ["com","net","org","xyz"];
-    const tldExtEl = document.getElementById("tldExt");
-    let tldIndex = 0;
-    setInterval(() => {
-      tldIndex = (tldIndex + 1) % tlds.length;
-      if(tldExtEl){
-        tldExtEl.style.opacity = 0;
-        setTimeout(() => {
-          tldExtEl.textContent = tlds[tldIndex];
-          tldExtEl.style.opacity = 1;
-        }, 140);
-      }
-    }, 1100);
-
-    // Domains wheel
-    const listEl = document.getElementById("domainRiseList");
-    const riseEl = document.getElementById("domainRise");
-
-    let autoY = 0;
-    let autoSpeed = 0.35;
-    let autoPaused = false;
-    let lastTime = null;
-    let contentHeight = 0;
-    let halfHeight = 0;
-
-    const contentHeightInit = () => {
-      if(listEl){
-        contentHeight = listEl.scrollHeight;
-        halfHeight = contentHeight / 2;
-      }
-    };
-
-    function measureHeights(){
-      contentHeightInit();
-    }
-    
-    if(listEl && riseEl){
-      measureHeights();
-      window.addEventListener("resize", measureHeights);
-
-      function rafLoop(timestamp){
-        if (!lastTime) lastTime = timestamp;
-        const dt = timestamp - lastTime;
-        lastTime = timestamp;
-
-        if (!autoPaused && document.body.classList.contains("domains-rise-on")){
-          autoY -= autoSpeed * (dt / 16);
-          if (Math.abs(autoY) >= halfHeight){
-            autoY += halfHeight;
-          }
-          if(listEl) listEl.style.transform = `translateY(${autoY}px)`;
-        }
-        requestAnimationFrame(rafLoop);
-      }
-      requestAnimationFrame(rafLoop);
-
-      riseEl.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        autoPaused = true;
-        const delta = e.deltaY;
-        autoY -= delta;
-        if (Math.abs(autoY) >= halfHeight){
-          autoY += (autoY > 0 ? -1 : 1) * halfHeight;
-        }
-        if(listEl) listEl.style.transform = `translateY(${autoY}px)`;
-
-        clearTimeout(riseEl._wheelTimeout);
-        riseEl._wheelTimeout = setTimeout(() => {
-          autoPaused = false;
-        }, 2000);
-      }, { passive:false });
-    }
-
-    // floating background text - تشغيل فوري
-    const bgStreams = document.getElementById("bgStreams");
-    const codeSnips = [
-      "fetch('/api/domains')",
-      "deploy('edge-functions')",
-      "async mintPrompt() { }",
-      "const lead = qualify(domain)",
-      "if(offer > floor) accept();"
-    ];
-    const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
-    const domainWords = [
-      "BostonCPAFirm.com",
-      "HomebuyersDubai.com",
-      "HomebuyersToronto.com",
-      "TopRealtorOrlando.com"
-    ];
-
-    function spawnChips(count){
-      if(!bgStreams) return;
-      for(let i=0;i<count;i++){
-        const el = document.createElement("span");
-        el.classList.add("bg-chip");
-        const mode = Math.random();
-        if (mode < .33) el.classList.add("code");
-        else if (mode < .66) el.classList.add("alt");
-
-        const pickArr = mode < .33 ? codeSnips : (mode < .66 ? domainWords : promptWords);
-        el.textContent = pickArr[Math.floor(Math.random()*pickArr.length)];
-
-        const x = Math.random()*100;
-        const y = Math.random()*100;
-        const delay = Math.random()*8;
-        const duration = 6 + Math.random()*6;
-
-        el.style.left = x + "%";
-        el.style.top = y + "%";
-        el.style.animationDuration = duration + "s";
-        el.style.animationDelay = (-delay) + "s";
-
-        bgStreams.appendChild(el);
-      }
-    }
-    
-    // تشغيل فوري للخلفية المتحركة
-    if(bgStreams){
-      spawnChips(28);
-    }
-
-    // domain-specific background photos
-    const bgPhoto = document.getElementById("bgPhoto");
-    const domainBgMap = {
-      "bostoncpafirm.com":   "photo/BostonCPAFirm.png",
-      "homebuyersdubai.com": "photo/HomebuyersDubai.png",
-      "homebuyerstoronto.com":"photo/HomebuyersToronto.png",
-      "toprealtororlando.com":"photo/TopRealtorOrlando.com",
-      "lasvegasleadgen.com": "photo/LasVegasLeadGen.png",
-      "floridavac.com":      "photo/floridavac.png",
-      "credentialleak.com":  "photo/CredentialLeak.png",
-      "dentalbellevue.com":  "photo/DentalBellevue.png",
-      "sanjoseroofs.com":    "photo/SanJoseRoofs.png"
-    };
-
-    function applyDomainBg(domainText){
-      if(!bgPhoto) return;
-      const key = domainText.trim().toLowerCase();
-      const img = domainBgMap[key];
-      if (!img) return;
-      document.body.classList.add("domain-bg-on");
-      bgPhoto.style.backgroundImage = `url('${img}')`;
-    }
-    function clearDomainBg(){
-      if(!bgPhoto) return;
-      document.body.classList.remove("domain-bg-on");
-      bgPhoto.style.backgroundImage = "";
-    }
-
-    if(listEl && riseEl){
-      const domainLinks = listEl.querySelectorAll("a");
-      domainLinks.forEach(a => {
-        const name = a.textContent;
-        a.addEventListener("mouseenter", () => applyDomainBg(name));
-      });
-      riseEl.addEventListener("mouseleave", clearDomainBg);
-    }
-
-    // prompt typing
-    const promptFloat = document.getElementById("promptFloat");
-    const promptWordsUI = ["PROMPT", "IDEA", "SYSTEM", "CHAIN", "VISION"];
-    let pw = 0;
-    
-    function runPrompt(){
-      if(!promptFloat) return;
-      const word = promptWordsUI[pw];
-      promptFloat.style.opacity = 1;
-      promptFloat.style.transform = "translateY(0)";
-      promptFloat.style.transition = "";
-      promptFloat.innerHTML = `<span id="promptText"></span><span class="prompt-caret"></span>`;
-      const promptText = document.getElementById("promptText");
-      let pc = 0;
-      const type = () => {
-        if(promptText) promptText.textContent = word.slice(0, pc);
-        pc++;
-        if (pc <= word.length){
-          setTimeout(type, 65);
-        } else {
+    window.addEventListener('DOMContentLoaded', function() {
+      const tlds = ["com","net","org","xyz"];
+      const tldExtEl = document.getElementById("tldExt");
+      let tldIndex = 0;
+      setInterval(() => {
+        tldIndex = (tldIndex + 1) % tlds.length;
+        if(tldExtEl){
+          tldExtEl.style.opacity = "0";
           setTimeout(() => {
-            promptFloat.style.transition = "transform 1.1s ease, opacity 1.1s ease";
-            promptFloat.style.transform = "translateY(-95px)";
-            promptFloat.style.opacity = 0;
-            setTimeout(() => {
-              pw = (pw + 1) % promptWordsUI.length;
-              runPrompt();
-            }, 1150);
-          }, 420);
+            tldExtEl.textContent = tlds[tldIndex];
+            tldExtEl.style.opacity = "1";
+          }, 140);
+        }
+      }, 1100);
+
+      const listEl = document.getElementById("domainRiseList");
+      const riseEl = document.getElementById("domainRise");
+
+      let autoY = 0;
+      let autoSpeed = 0.35;
+      let autoPaused = false;
+      let lastTime = null;
+      let contentHeight = 0;
+      let halfHeight = 0;
+
+      const contentHeightInit = () => {
+        if(listEl){
+          contentHeight = listEl.scrollHeight;
+          halfHeight = contentHeight / 2;
         }
       };
-      type();
-    }
-    
-    if(promptFloat) runPrompt();
 
-    // code typing on laptop
-    const codeTypingEl = document.getElementById("codeTyping");
-    const codeLines = [
-      "const idea = build('domain-store');",
-      "git push origin main",
-      "deploy('github-pages');",
-      "pinTraffic -> landing -> GoDaddy"
-    ];
-    let lineIndex = 0, charIndex = 0;
-    
-    function typeLoop(){
-      if(!codeTypingEl) return;
-      const line = codeLines[lineIndex];
-      codeTypingEl.textContent = line.slice(0, charIndex);
-      charIndex++;
-      if (charIndex <= line.length) setTimeout(typeLoop, 42);
-      else {
-        setTimeout(() => {
-          const erase = () => {
-            charIndex--;
-            if(codeTypingEl) codeTypingEl.textContent = line.slice(0, charIndex);
-            if (charIndex > 0) setTimeout(erase, 18);
-            else {
-              lineIndex = (lineIndex + 1) % codeLines.length;
-              setTimeout(typeLoop, 250);
-            }
-          };
-          erase();
-        }, 700);
+      function measureHeights(){
+        contentHeightInit();
       }
-    }
-    
-    if(codeTypingEl) typeLoop();
+      
+      if(listEl && riseEl){
+        measureHeights();
+        window.addEventListener("resize", measureHeights);
 
-    // focus mode + panels
-    const cardDomains = document.getElementById("cardDomains");
-    const cardContact = document.getElementById("cardContact");
-    let timers = [];
+        function rafLoop(timestamp){
+          if (!lastTime) lastTime = timestamp;
+          const dt = timestamp - lastTime;
+          lastTime = timestamp;
 
-    function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
-    function resetAll(){
-      clearTimers();
-      document.body.classList.remove("focus-domains","focus-contact","domains-panel-on","domains-rise-on","contact-panel-on");
-      const domainWall = document.getElementById("domainWall");
-      const contactPanel = document.getElementById("contactPanel");
-      if(domainWall) domainWall.setAttribute("aria-hidden","true");
-      if(contactPanel) contactPanel.setAttribute("aria-hidden","true");
-      clearDomainBg();
-    }
+          if (!autoPaused && document.body.classList.contains("domains-rise-on")){
+            autoY -= autoSpeed * (dt / 16);
+            if (Math.abs(autoY) >= halfHeight){
+              autoY += halfHeight;
+            }
+            if(listEl) listEl.style.transform = "translateY(" + autoY + "px)";
+          }
+          requestAnimationFrame(rafLoop);
+        }
+        requestAnimationFrame(rafLoop);
 
-    if(cardDomains){
-      cardDomains.addEventListener("mouseenter", () => {
-        resetAll();
-        document.body.classList.add("focus-domains");
+        riseEl.addEventListener("wheel", (e) => {
+          e.preventDefault();
+          autoPaused = true;
+          const delta = e.deltaY;
+          autoY -= delta;
+          if (Math.abs(autoY) >= halfHeight){
+            autoY += (autoY > 0 ? -1 : 1) * halfHeight;
+          }
+          if(listEl) listEl.style.transform = "translateY(" + autoY + "px)";
 
-        timers.push(setTimeout(() => {
-          document.body.classList.add("domains-panel-on");
-          const domainWall = document.getElementById("domainWall");
-          if(domainWall) domainWall.setAttribute("aria-hidden","false");
-        }, 240));
+          clearTimeout(riseEl._wheelTimeout);
+          riseEl._wheelTimeout = setTimeout(() => {
+            autoPaused = false;
+          }, 2000);
+        }, { passive:false });
+      }
 
-        timers.push(setTimeout(() => {
-          document.body.classList.add("domains-rise-on");
-        }, 240 + 180));
+      const bgStreams = document.getElementById("bgStreams");
+      const codeSnips = [
+        "fetch('/api/domains')",
+        "deploy('edge-functions')",
+        "async mintPrompt() { }",
+        "const lead = qualify(domain)",
+        "if(offer > floor) accept();"
+      ];
+      const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
+      const domainWords = [
+        "BostonCPAFirm.com",
+        "HomebuyersDubai.com",
+        "HomebuyersToronto.com",
+        "TopRealtorOrlando.com"
+      ];
+
+      function spawnChips(count){
+        if(!bgStreams) return;
+        for(let i=0;i<count;i++){
+          const el = document.createElement("span");
+          el.classList.add("bg-chip");
+          const mode = Math.random();
+          if (mode < 0.33) el.classList.add("code");
+          else if (mode < 0.66) el.classList.add("alt");
+
+          const pickArr = mode < 0.33 ? codeSnips : (mode < 0.66 ? domainWords : promptWords);
+          el.textContent = pickArr[Math.floor(Math.random()*pickArr.length)];
+
+          const x = Math.random()*100;
+          const y = Math.random()*100;
+          const delay = Math.random()*8;
+          const duration = 6 + Math.random()*6;
+
+          el.style.left = x + "%";
+          el.style.top = y + "%";
+          el.style.animationDuration = duration + "s";
+          el.style.animationDelay = (-delay) + "s";
+
+          bgStreams.appendChild(el);
+        }
+      }
+      
+      spawnChips(28);
+
+      const bgPhoto = document.getElementById("bgPhoto");
+      const domainBgMap = {
+        "bostoncpafirm.com":   "photo/BostonCPAFirm.png",
+        "homebuyersdubai.com": "photo/HomebuyersDubai.png",
+        "homebuyerstoronto.com":"photo/HomebuyersToronto.png",
+        "toprealtororlando.com":"photo/TopRealtorOrlando.png",
+        "lasvegasleadgen.com": "photo/LasVegasLeadGen.png",
+        "floridavac.com":      "photo/floridavac.png",
+        "credentialleak.com":  "photo/CredentialLeak.png",
+        "dentalbellevue.com":  "photo/DentalBellevue.png",
+        "sanjoseroofs.com":    "photo/SanJoseRoofs.png"
+      };
+
+      function applyDomainBg(domainText){
+        if(!bgPhoto) return;
+        const key = domainText.trim().toLowerCase();
+        const img = domainBgMap[key];
+        if (!img) return;
+        document.body.classList.add("domain-bg-on");
+        bgPhoto.style.backgroundImage = "url('" + img + "')";
+      }
+      function clearDomainBg(){
+        if(!bgPhoto) return;
+        document.body.classList.remove("domain-bg-on");
+        bgPhoto.style.backgroundImage = "";
+      }
+
+      if(listEl && riseEl){
+        const domainLinks = listEl.querySelectorAll("a");
+        domainLinks.forEach(a => {
+          const name = a.textContent;
+          a.addEventListener("mouseenter", () => applyDomainBg(name));
+        });
+        riseEl.addEventListener("mouseleave", clearDomainBg);
+      }
+
+      const promptFloat = document.getElementById("promptFloat");
+      const promptWordsUI = ["PROMPT", "IDEA", "SYSTEM", "CHAIN", "VISION"];
+      let pw = 0;
+      
+      function runPrompt(){
+        if(!promptFloat) return;
+        const word = promptWordsUI[pw];
+        promptFloat.style.opacity = "1";
+        promptFloat.style.transform = "translateY(0)";
+        promptFloat.style.transition = "";
+        promptFloat.innerHTML = '<span id="promptText"></span><span class="prompt-caret"></span>';
+        const promptText = document.getElementById("promptText");
+        let pc = 0;
+        const type = () => {
+          if(promptText) promptText.textContent = word.slice(0, pc);
+          pc++;
+          if (pc <= word.length){
+            setTimeout(type, 65);
+          } else {
+            setTimeout(() => {
+              promptFloat.style.transition = "transform 1.1s ease, opacity 1.1s ease";
+              promptFloat.style.transform = "translateY(-95px)";
+              promptFloat.style.opacity = "0";
+              setTimeout(() => {
+                pw = (pw + 1) % promptWordsUI.length;
+                runPrompt();
+              }, 1150);
+            }, 420);
+          }
+        };
+        type();
+      }
+      
+      if(promptFloat) runPrompt();
+
+      const codeTypingEl = document.getElementById("codeTyping");
+      const codeLines = [
+        "const idea = build('domain-store');",
+        "git push origin main",
+        "deploy('github-pages');",
+        "pinTraffic -> landing -> GoDaddy"
+      ];
+      let lineIndex = 0, charIndex = 0;
+      
+      function typeLoop(){
+        if(!codeTypingEl) return;
+        const line = codeLines[lineIndex];
+        codeTypingEl.textContent = line.slice(0, charIndex);
+        charIndex++;
+        if (charIndex <= line.length) setTimeout(typeLoop, 42);
+        else {
+          setTimeout(() => {
+            const erase = () => {
+              charIndex--;
+              if(codeTypingEl) codeTypingEl.textContent = line.slice(0, charIndex);
+              if (charIndex > 0) setTimeout(erase, 18);
+              else {
+                lineIndex = (lineIndex + 1) % codeLines.length;
+                setTimeout(typeLoop, 250);
+              }
+            };
+            erase();
+          }, 700);
+        }
+      }
+      
+      if(codeTypingEl) typeLoop();
+
+      const cardDomains = document.getElementById("cardDomains");
+      const cardContact = document.getElementById("cardContact");
+      let timers = [];
+
+      function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+      function resetAll(){
+        clearTimers();
+        document.body.classList.remove("focus-domains","focus-contact","domains-panel-on","domains-rise-on","contact-panel-on");
+        const domainWall = document.getElementById("domainWall");
+        const contactPanel = document.getElementById("contactPanel");
+        if(domainWall) domainWall.setAttribute("aria-hidden","true");
+        if(contactPanel) contactPanel.setAttribute("aria-hidden","true");
+        clearDomainBg();
+      }
+
+      if(cardDomains){
+        cardDomains.addEventListener("mouseenter", () => {
+          resetAll();
+          document.body.classList.add("focus-domains");
+
+          timers.push(setTimeout(() => {
+            document.body.classList.add("domains-panel-on");
+            const domainWall = document.getElementById("domainWall");
+            if(domainWall) domainWall.setAttribute("aria-hidden","false");
+          }, 240));
+
+          timers.push(setTimeout(() => {
+            document.body.classList.add("domains-rise-on");
+          }, 240 + 180));
+        });
+      }
+
+      if(cardContact){
+        cardContact.addEventListener("mouseenter", () => {
+          resetAll();
+          document.body.classList.add("focus-contact");
+
+          timers.push(setTimeout(() => {
+            document.body.classList.add("contact-panel-on");
+            const contactPanel = document.getElementById("contactPanel");
+            if(contactPanel) contactPanel.setAttribute("aria-hidden","false");
+          }, 120));
+        });
+      }
+
+      document.addEventListener("mousemove", (e) => {
+        const inside = e.target.closest("#stage, #domainWall, #contactPanel, #cardDomains, #cardContact");
+        if (!inside) resetAll();
       });
-    }
 
-    if(cardContact){
-      cardContact.addEventListener("mouseenter", () => {
-        resetAll();
-        document.body.classList.add("focus-contact");
+      const cardPrompts = document.getElementById("cardPrompts");
+      const cardCode = document.getElementById("cardCode");
+      const cardExtension = document.getElementById("cardExtension");
 
-        timers.push(setTimeout(() => {
-          document.body.classList.add("contact-panel-on");
-          const contactPanel = document.getElementById("contactPanel");
-          if(contactPanel) contactPanel.setAttribute("aria-hidden","false");
-        }, 120));
-      });
-    }
-
-    document.addEventListener("mousemove", (e) => {
-      const inside = e.target.closest("#stage, #domainWall, #contactPanel, #cardDomains, #cardContact");
-      if (!inside) resetAll();
+      if(cardPrompts) cardPrompts.addEventListener("click", () => window.location.href = "prompts/");
+      if(cardCode) cardCode.addEventListener("click", () => window.location.href = "code/");
+      if(cardDomains) cardDomains.addEventListener("click", () => window.location.href = "domains/");
+      if(cardExtension) cardExtension.addEventListener("click", () => window.location.href = "extension/");
     });
-
-    // click routes
-    const cardPrompts = document.getElementById("cardPrompts");
-    const cardCode = document.getElementById("cardCode");
-    const cardExtension = document.getElementById("cardExtension");
-
-    if(cardPrompts) cardPrompts.addEventListener("click", () => window.location.href = "prompts/");
-    if(cardCode) cardCode.addEventListener("click", () => window.location.href = "code/");
-    if(cardDomains) cardDomains.addEventListener("click", () => window.location.href = "domains/");
-    if(cardExtension) cardExtension.addEventListener("click", () => window.location.href = "extension/");
   </script>
 </Layout>
