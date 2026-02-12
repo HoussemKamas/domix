@@ -917,7 +917,7 @@ for(let i = 0; i < 35; i++){
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href={`/domain-detail#${item.id}`} class="domain-link" title={item.domain ?? item.name}>
+            <a href={`/domains-details#${item.id}`} class="domain-link" title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
@@ -1192,14 +1192,34 @@ for(let i = 0; i < 35; i++){
         if (!inside) resetAll();
       });
 
+      // ====== التنقل للصفحات الأخرى ======
       const cardPrompts = document.getElementById("cardPrompts");
       const cardCode = document.getElementById("cardCode");
       const cardExtension = document.getElementById("cardExtension");
 
-      if(cardPrompts) cardPrompts.addEventListener("click", function() { window.location.href = "prompts/"; });
-      if(cardCode) cardCode.addEventListener("click", function() { window.location.href = "code/"; });
-      if(cardDomains) cardDomains.addEventListener("click", function() { window.location.href = "domains/"; });
-      if(cardExtension) cardExtension.addEventListener("click", function() { window.location.href = "extension/"; });
+      if(cardPrompts) {
+        cardPrompts.addEventListener("click", function() { 
+          window.location.href = "/prompts"; 
+        });
+      }
+      
+      if(cardCode) {
+        cardCode.addEventListener("click", function() { 
+          window.location.href = "/code"; 
+        });
+      }
+      
+      if(cardDomains) {
+        cardDomains.addEventListener("click", function() { 
+          window.location.href = "/domains"; 
+        });
+      }
+      
+      if(cardExtension) {
+        cardExtension.addEventListener("click", function() { 
+          window.location.href = "/extension"; 
+        });
+      }
     });
   </script>
 </Layout>
