@@ -335,104 +335,108 @@ const allDomains = [...(data.domains ?? [])];
 
   <script>
     // ====== 1. تحميل البيانات من domix.json (ممررة في data-domains) ======
-    function parseDomains(){
-      const wrap = document.querySelector('.wrap');
-      if(!wrap) return [];
-      try{
-        const raw = wrap.getAttribute('data-domains') || '[]';
+    function parseDomains() {
+      var wrap = document.querySelector('.wrap');
+      if (!wrap) return [];
+      try {
+        var raw = wrap.getAttribute('data-domains') || '[]';
         return JSON.parse(raw);
-      }catch(e){
+      } catch (e) {
         console.error('Failed to parse domains data', e);
         return [];
       }
     }
 
-    function getDomainFromHash(domains){
-      const hash = window.location.hash.replace('#','').trim();
-      if(!hash) return domains[0] || null;
+    function getDomainFromHash(domains) {
+      var hash = window.location.hash.replace('#', '').trim();
+      if (!hash) return domains[0] || null;
 
-      // جرّب المطابقة كـ id رقمي أو نصّي
-      const byId = domains.find(d => String(d.id) === hash);
-      if(byId) return byId;
+      var byId = domains.find(function (d) {
+        return String(d.id) === hash;
+      });
+      if (byId) return byId;
 
-      // أو مطابقة على الاسم/الدومين (مثلاً domain.com في الهاش)
-      const lower = hash.toLowerCase();
-      const byName = domains.find(
-        d =>
+      var lower = hash.toLowerCase();
+      var byName = domains.find(function (d) {
+        return (
           (d.domain && d.domain.toLowerCase() === lower) ||
           (d.name && d.name.toLowerCase() === lower)
-      );
+        );
+      });
       return byName || domains[0] || null;
     }
 
-    function formatPrice(p){
-      if(!p && p !== 0) return 'Make Offer';
-      if(typeof p === 'number'){
+    function formatPrice(p) {
+      if (!p && p !== 0) return 'Make Offer';
+      if (typeof p === 'number') {
         return '$' + p.toLocaleString();
       }
       return String(p);
     }
 
-    // بناء روابط واتساب/العرض
-    const phone = "213781302576";
-    function buildWhatsApp(title, price){
-      const msg = \`DOMIX Domain Inquiry - \${title} - \${price}\`;
-      return \`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`;
+    // بناء رابط واتساب بدون template literals
+    var phone = '213781302576';
+    function buildWhatsApp(title, price) {
+      var msg = 'DOMIX Domain Inquiry - ' + title + ' - ' + price;
+      return 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
     }
 
-    function updateDomainDetails(){
-      const domains = parseDomains();
-      if(!domains.length) return;
+    function updateDomainDetails() {
+      var domains = parseDomains();
+      if (!domains.length) return;
 
-      const item = getDomainFromHash(domains);
-      if(!item) return;
+      var item = getDomainFromHash(domains);
+      if (!item) return;
 
-      const label = item.domain || item.name || 'Domain.com';
-      const priceLabel = formatPrice(item.price);
-      const niche = item.niche || item.category || '';
-      const status = item.status || '';
-      const notes = item.notes || '';
-      const image = item.image || '';
+      var label = item.domain || item.name || 'Domain.com';
+      var priceLabel = formatPrice(item.price);
+      var niche = item.niche || item.category || '';
+      var status = item.status || '';
+      var notes = item.notes || '';
+      var image = item.image || '';
 
-      document.title = label + " — Details";
+      document.title = label + ' — Details';
 
-      const nameEl = document.getElementById('detailName');
-      const priceEl = document.getElementById('detailPrice');
-      const descEl = document.getElementById('detailDescription');
-      const visualContainer = document.getElementById('domainVisual');
+      var nameEl = document.getElementById('detailName');
+      var priceEl = document.getElementById('detailPrice');
+      var descEl = document.getElementById('detailDescription');
+      var visualContainer = document.getElementById('domainVisual');
 
-      if(nameEl) nameEl.textContent = label;
-      if(priceEl) priceEl.textContent = priceLabel;
+      if (nameEl) nameEl.textContent = label;
+      if (priceEl) priceEl.textContent = priceLabel;
 
-      if(descEl && (niche || status || notes)){
-        let extra = "";
-        if(niche) extra += \`Niche: \${niche}. \`;
-        if(status) extra += \`Status: \${status}. \`;
-        if(notes) extra += "\\n\\n" + notes;
+      if (descEl && (niche || status || notes)) {
+        var extra = '';
+        if (niche) extra += 'Niche: ' + niche + '. ';
+        if (status) extra += 'Status: ' + status + '. ';
+        if (notes) extra += '\n\n' + notes;
         descEl.textContent = extra;
       }
 
-      if(visualContainer){
-        if(image){
+      if (visualContainer) {
+        if (image) {
           visualContainer.innerHTML =
-            '<img src="' + image +
-            '" class="domain-logo-lg" alt="' + label + ' logo" />';
+            '<img src="' +
+            image +
+            '" class="domain-logo-lg" alt="' +
+            label +
+            ' logo" />';
         } else {
           visualContainer.innerHTML =
             '<div class="domain-text-lg">' + label + '</div>';
         }
       }
 
-      const buyBtn = document.getElementById('btnBuy');
-      const offerBtn = document.getElementById('btnOffer');
-      const waLink = buildWhatsApp(label, priceLabel);
+      var buyBtn = document.getElementById('btnBuy');
+      var offerBtn = document.getElementById('btnOffer');
+      var waLink = buildWhatsApp(label, priceLabel);
 
-      if(buyBtn){
+      if (buyBtn) {
         buyBtn.href = waLink;
         buyBtn.onclick = null;
       }
-      if(offerBtn){
-        offerBtn.onclick = function(){
+      if (offerBtn) {
+        offerBtn.onclick = function () {
           window.open(waLink, '_blank');
         };
       }
@@ -441,69 +445,73 @@ const allDomains = [...(data.domains ?? [])];
     window.addEventListener('load', updateDomainDetails);
     window.addEventListener('hashchange', updateDomainDetails);
 
-    // ====== 2. خلفية الجزيئات (Particles) ======
-    const canvas = document.getElementById("particles");
-    const ctx = canvas.getContext("2d", { alpha: true });
+    // ====== 2. خلفية الجزيئات (Particles) بدون backticks ======
+    (function () {
+      var canvas = document.getElementById('particles');
+      if (!canvas) return;
 
-    function fitCanvas(){
-      const dpr = window.devicePixelRatio || 1;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+      var ctx = canvas.getContext('2d', { alpha: true });
 
-    const particles = [];
-    function initParticles(){
-      particles.length = 0;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const count = Math.floor(w * h / 15000);
-      for(let i=0; i<count; i++){
-        particles.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
-          size: Math.random() * 2 + 0.5,
-          alpha: Math.random() * 0.5 + 0.1
-        });
+      function fitCanvas() {
+        var dpr = window.devicePixelRatio || 1;
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
-    }
 
-    function animateParticles(){
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
+      var particles = [];
+      function initParticles() {
+        particles.length = 0;
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var count = Math.floor((w * h) / 15000);
+        for (var i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 2 + 0.5,
+            alpha: Math.random() * 0.5 + 0.1
+          });
+        }
+      }
 
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
+      function animateParticles() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
 
-        if(p.x < 0) p.x = w;
-        if(p.x > w) p.x = 0;
-        if(p.y < 0) p.y = h;
-        if(p.y > h) p.y = 0;
+        particles.forEach(function (p) {
+          p.x += p.vx;
+          p.y += p.vy;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = \`rgba(255, 255, 255, \${p.alpha})\`;
-        ctx.fill();
-      });
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
 
-      requestAnimationFrame(animateParticles);
-    }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, ' + p.alpha + ')';
+          ctx.fill();
+        });
 
-    fitCanvas();
-    initParticles();
-    animateParticles();
+        requestAnimationFrame(animateParticles);
+      }
 
-    window.addEventListener('resize', () => {
       fitCanvas();
       initParticles();
-    });
+      animateParticles();
+
+      window.addEventListener('resize', function () {
+        fitCanvas();
+        initParticles();
+      });
+    })();
   </script>
 </Layout>
