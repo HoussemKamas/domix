@@ -917,7 +917,7 @@ for(let i = 0; i < 35; i++){
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href={`domains-details#${item.id}`} title={item.domain ?? item.name}>
+            <a href={`domains?goto=${item.id}`} title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
