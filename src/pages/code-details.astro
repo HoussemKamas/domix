@@ -712,7 +712,7 @@ function example() {
       display:flex;
       align-items:center;
       gap: 12px;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      transition: transform .18s ease, box-shadow .18s.ease, border-color .18s.ease, background .18s.ease;
       backdrop-filter: blur(10px);
     }
     .buyBtn:hover{
@@ -728,7 +728,7 @@ function example() {
       background: rgba(0,0,0,.20);
       box-shadow: 0 0 20px rgba(0,255,136,.10);
       font-size: 16px;
-      flex: 0 0 auto;
+      flex: 0 0.auto;
     }
     .hint{
       margin-top: 10px;
@@ -743,45 +743,45 @@ function example() {
 
   <script>
     // FREE/PAID SWITCH (hash)
-    function renderPanel(){
-      const h = (location.hash || "#free").toLowerCase();
-      const free = document.getElementById("freePanel");
-      const paid = document.getElementById("paidPanel");
-      free.classList.remove("active");
-      paid.classList.remove("active");
+    function renderPanel() {
+      const h = (location.hash || '#free').toLowerCase();
+      const free = document.getElementById('freePanel');
+      const paid = document.getElementById('paidPanel');
+      free.classList.remove('active');
+      paid.classList.remove('active');
 
-      const isPaid = (h === "#paid");
-      (isPaid ? paid : free).classList.add("active");
+      const isPaid = h === '#paid';
+      (isPaid ? paid : free).classList.add('active');
 
-      const crumb = document.getElementById("crumbName");
-      if (crumb){
-        const freeName = crumb.dataset.free || "Free code";
-        const paidName = crumb.dataset.paid || "Paid code";
+      const crumb = document.getElementById('crumbName');
+      if (crumb) {
+        const freeName = crumb.dataset.free || 'Free code';
+        const paidName = crumb.dataset.paid || 'Paid code';
         crumb.textContent = isPaid ? paidName : freeName;
       }
     }
-    window.addEventListener("hashchange", renderPanel);
+    window.addEventListener('hashchange', renderPanel);
     renderPanel();
 
     // WhatsApp link builder (paid)
-    const phone = "213781302576";
-    function buildWhatsApp(title, price, type){
-      const msg = \`DOMIX Inquiry - \${type} - \${title} - \${price}\`;
-      return \`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`;
+    const phone = '213781302576';
+    function buildWhatsApp(title, price, type) {
+      const msg = `DOMIX Inquiry - ${type} - ${title} - ${price}`;
+      return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     }
-    const waBtn = document.getElementById("waBtn");
-    if (waBtn){
-      const t = waBtn.dataset.title || "Code";
-      const p = waBtn.dataset.price || "Price";
-      waBtn.href = buildWhatsApp(t, p, "Code");
+    const waBtn = document.getElementById('waBtn');
+    if (waBtn) {
+      const t = waBtn.dataset.title || 'Code';
+      const p = waBtn.dataset.price || 'Price';
+      waBtn.href = buildWhatsApp(t, p, 'Code');
     }
 
     // MATRIX RAIN
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
 
-    let W = canvas.width = window.innerWidth;
-    let H = canvas.height = window.innerHeight;
+    let W = (canvas.width = window.innerWidth);
+    let H = (canvas.height = window.innerHeight);
 
     const chars = '01<>[]{}+-=/*_()$#@!CODE';
     const charArray = chars.split('');
@@ -789,21 +789,21 @@ function example() {
     let columns = Math.floor(W / fontSize);
     let drops = new Array(columns).fill(1);
 
-    function resize(){
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
+    function resize() {
+      W = (canvas.width = window.innerWidth);
+      H = (canvas.height = window.innerHeight);
       columns = Math.floor(W / fontSize);
       drops = new Array(columns).fill(1);
     }
     window.addEventListener('resize', resize);
 
-    function drawMatrix(){
+    function drawMatrix() {
       ctx.fillStyle = 'rgba(2, 5, 2, 0.06)';
       ctx.fillRect(0, 0, W, H);
 
       ctx.font = fontSize + 'px monospace';
-      for(let i=0; i<drops.length; i++){
-        const text = charArray[Math.floor(Math.random()*charArray.length)];
+      for (let i = 0; i < drops.length; i++) {
+        const text = charArray[Math.floor(Math.random() * charArray.length)];
         const y = drops[i] * fontSize;
 
         ctx.fillStyle = 'rgba(0,255,136,0.85)';
@@ -811,7 +811,7 @@ function example() {
         ctx.shadowBlur = 8;
         ctx.fillText(text, i * fontSize, y);
 
-        if(y > H && Math.random() > 0.975) drops[i] = 0;
+        if (y > H && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       }
       ctx.shadowBlur = 0;
