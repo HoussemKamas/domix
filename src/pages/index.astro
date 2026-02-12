@@ -738,7 +738,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
 
     body.focus-domains #cardDomains,
     body.focus-contact #cardContact{
-      transition: transform var(--moveDur).ease, box-shadow .35s.ease, border-color .35s.ease, opacity .2s.ease;
+      transition: transform var(--moveDur).ease, box-shadow .35s.ease, border-color .35s.ease, opacity .2s ease;
       z-index: 110;
     }
 
@@ -834,7 +834,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     <div class="ttl">Contact</div>
 
     <div class="contact-actions">
-      <!-- Email: mailto opens user's email client with your address -->
       <a class="contact-pill pill-gmail" href="mailto:houssemkamas96@gmail.com">
         <div class="pill-ico" title="Email">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -860,7 +859,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         </div>
       </a>
 
-      <!-- WhatsApp: Click to chat with pre-filled English message -->
       <a
         class="contact-pill pill-wa"
         href="https://wa.me/213781302576?text=Hello%20my%20friend%2C%0AIf%20you%20have%20any%20questions%2C%20I%27m%20here%20to%20help.%0AJust%20leave%20a%20message%20and%20I%27ll%20reply%20soon.%0AThank%20you%20for%20contacting%20me.%20Have%20a%20nice%20day%21"
@@ -927,7 +925,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Snippets & templates</div>
         </div>
 
-        <!-- Extension (قبل Contact) -->
+        <!-- Extension -->
         <div class="menu-card card-extension" id="cardExtension">
           <div class="ext-orb">
             <div class="ext-window">
@@ -947,7 +945,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Browser add-on</div>
         </div>
 
-        <!-- Contact (بعد Extension) -->
+        <!-- Contact -->
         <div class="menu-card card-contact" id="cardContact">
           <div class="env-box">
             <svg class="env-svg" viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -975,270 +973,309 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     </div>
   </section>
 
-  <script>
-    // TLD animation
-    const tlds = ["com","net","org","xyz"];
-    const tldExtEl = document.getElementById("tldExt");
-    let tldIndex = 0;
-    setInterval(() => {
-      tldIndex = (tldIndex + 1) % tlds.length;
-      tldExtEl.style.opacity = 0;
-      setTimeout(() => {
-        tldExtEl.textContent = tlds[tldIndex];
-        tldExtEl.style.opacity = 1;
-      }, 140);
-    }, 1100);
-
-    // Domains wheel
-    const listEl = document.getElementById("domainRiseList");
-    const riseEl = document.getElementById("domainRise");
-
-    let autoY = 0;
-    let autoSpeed = 0.35;
-    let autoPaused = false;
-    let lastTime = null;
-    let contentHeight = 0;
-    let halfHeight = 0;
-
-    const contentHeightInit = () => {
-      contentHeight = listEl.scrollHeight;
-      halfHeight = contentHeight / 2;
-    };
-
-    function measureHeights(){
-      contentHeightInit();
-    }
-    measureHeights();
-    window.addEventListener("resize", measureHeights);
-
-    function rafLoop(timestamp){
-      if (!lastTime) lastTime = timestamp;
-      const dt = timestamp - lastTime;
-      lastTime = timestamp;
-
-      if (!autoPaused && document.body.classList.contains("domains-rise-on")){
-        autoY -= autoSpeed * (dt / 16);
-        if (Math.abs(autoY) >= halfHeight){
-          autoY += halfHeight;
-        }
-        listEl.style.transform = `translateY(${autoY}px)`;
-      }
-      requestAnimationFrame(rafLoop);
-    }
-    requestAnimationFrame(rafLoop);
-
-    riseEl.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      autoPaused = true;
-      const delta = e.deltaY;
-      autoY -= delta;
-      if (Math.abs(autoY) >= halfHeight){
-        autoY += (autoY > 0 ? -1 : 1) * halfHeight;
-      }
-      listEl.style.transform = `translateY(${autoY}px)`;
-
-      clearTimeout(riseEl._wheelTimeout);
-      riseEl._wheelTimeout = setTimeout(() => {
-        autoPaused = false;
-      }, 2000);
-    }, { passive:false });
-
-    // floating background text
-    const bgStreams = document.getElementById("bgStreams");
-    const codeSnips = [
-      "fetch('/api/domains')",
-      "deploy('edge-functions')",
-      "async mintPrompt() { }",
-      "const lead = qualify(domain)",
-      "if(offer > floor) accept();"
-    ];
-    const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
-
-    const domainWords = [
-      "BostonCPAFirm.com",
-      "HomebuyersDubai.com",
-      "HomebuyersToronto.com",
-      "TopRealtorOrlando.com"
-    ];
-
-    function spawnChips(count){
-      for(let i=0;i<count;i++){
-        const el = document.createElement("span");
-        el.classList.add("bg-chip");
-        const mode = Math.random();
-        if (mode < .33) el.classList.add("code");
-        else if (mode < .66) el.classList.add("alt");
-
-        const pickArr = mode < .33 ? codeSnips : (mode < .66 ? domainWords : promptWords);
-        el.textContent = pickArr[Math.floor(Math.random()*pickArr.length)];
-
-        const x = Math.random()*100;
-        const y = Math.random()*100;
-        const delay = Math.random()*8;
-        const duration = 6 + Math.random()*6;
-
-        el.style.left = x + "%";
-        el.style.top = y + "%";
-        el.style.animationDuration = duration + "s";
-        el.style.animationDelay = (-delay) + "s";
-
-        bgStreams.appendChild(el);
-      }
-    }
-    spawnChips(28);
-
-    // domain-specific background photos
-    const bgPhoto = document.getElementById("bgPhoto");
-
-    const domainBgMap = {
-      "bostoncpafirm.com":   "photo/BostonCPAFirm.png",
-      "homebuyersdubai.com": "photo/HomebuyersDubai.png",
-      "homebuyerstoronto.com":"photo/HomebuyersToronto.png",
-      "toprealtororlando.com":"photo/TopRealtorOrlando.png",
-      "lasvegasleadgen.com": "photo/LasVegasLeadGen.png",
-      "floridavac.com":      "photo/floridavac.png",
-      "credentialleak.com":  "photo/CredentialLeak.png",
-      "dentalbellevue.com":  "photo/DentalBellevue.png",
-      "sanjoseroofs.com":    "photo/SanJoseRoofs.png"
-    };
-
-    function applyDomainBg(domainText){
-      const key = domainText.trim().toLowerCase();
-      const img = domainBgMap[key];
-      if (!img) return;
-      document.body.classList.add("domain-bg-on");
-      bgPhoto.style.backgroundImage = `url('${img}')`;
-    }
-    function clearDomainBg(){
-      document.body.classList.remove("domain-bg-on");
-      bgPhoto.style.backgroundImage = "";
-    }
-
-    const domainLinks = listEl.querySelectorAll("a");
-    domainLinks.forEach(a => {
-      const name = a.textContent;
-      a.addEventListener("mouseenter", () => applyDomainBg(name));
-    });
-    riseEl.addEventListener("mouseleave", clearDomainBg);
-
-    // prompt typing
-    const promptFloat = document.getElementById("promptFloat");
-    const promptWordsUI = ["PROMPT", "IDEA", "SYSTEM", "CHAIN", "VISION"];
-    let pw = 0;
-    function runPrompt(){
-      const word = promptWordsUI[pw];
-      promptFloat.style.opacity = 1;
-      promptFloat.style.transform = "translateY(0)";
-      promptFloat.style.transition = "";
-      promptFloat.innerHTML = `<span id="promptText"></span><span class="prompt-caret"></span>`;
-      const promptText = document.getElementById("promptText");
-      let pc = 0;
-      const type = () => {
-        promptText.textContent = word.slice(0, pc);
-        pc++;
-        if (pc <= word.length){
-          setTimeout(type, 65);
-        } else {
-          setTimeout(() => {
-            promptFloat.style.transition = "transform 1.1s ease, opacity 1.1s ease";
-            promptFloat.style.transform = "translateY(-95px)";
-            promptFloat.style.opacity = 0;
+  <script is:inline>
+    (function() {
+      'use strict';
+      
+      function initApp() {
+        // TLD animation
+        const tldExtEl = document.getElementById("tldExt");
+        if (tldExtEl) {
+          const tlds = ["com","net","org","xyz"];
+          let tldIndex = 0;
+          setInterval(() => {
+            tldIndex = (tldIndex + 1) % tlds.length;
+            tldExtEl.style.opacity = "0";
             setTimeout(() => {
-              pw = (pw + 1) % promptWordsUI.length;
-              runPrompt();
-            }, 1150);
-          }, 420);
+              tldExtEl.textContent = tlds[tldIndex];
+              tldExtEl.style.opacity = "1";
+            }, 140);
+          }, 1100);
         }
-      };
-      type();
-    }
-    runPrompt();
 
-    // code typing on laptop
-    const codeTypingEl = document.getElementById("codeTyping");
-    const codeLines = [
-      "const idea = build('domain-store');",
-      "git push origin main",
-      "deploy('github-pages');",
-      "pinTraffic -> landing -> GoDaddy"
-    ];
-    let lineIndex = 0, charIndex = 0;
-    function typeLoop(){
-      const line = codeLines[lineIndex];
-      codeTypingEl.textContent = line.slice(0, charIndex);
-      charIndex++;
-      if (charIndex <= line.length) setTimeout(typeLoop, 42);
-      else {
-        setTimeout(() => {
-          const erase = () => {
-            charIndex--;
-            codeTypingEl.textContent = line.slice(0, charIndex);
-            if (charIndex > 0) setTimeout(erase, 18);
-            else {
-              lineIndex = (lineIndex + 1) % codeLines.length;
-              setTimeout(typeLoop, 250);
-            }
+        // Domains wheel
+        const listEl = document.getElementById("domainRiseList");
+        const riseEl = document.getElementById("domainRise");
+
+        if (listEl && riseEl) {
+          let autoY = 0;
+          let autoSpeed = 0.35;
+          let autoPaused = false;
+          let lastTime = null;
+          let contentHeight = 0;
+          let halfHeight = 0;
+
+          const contentHeightInit = () => {
+            contentHeight = listEl.scrollHeight;
+            halfHeight = contentHeight / 2;
           };
-          erase();
-        }, 700);
+
+          function measureHeights(){
+            contentHeightInit();
+          }
+          measureHeights();
+          window.addEventListener("resize", measureHeights);
+
+          function rafLoop(timestamp){
+            if (!lastTime) lastTime = timestamp;
+            const dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (!autoPaused && document.body.classList.contains("domains-rise-on")){
+              autoY -= autoSpeed * (dt / 16);
+              if (Math.abs(autoY) >= halfHeight){
+                autoY += halfHeight;
+              }
+              listEl.style.transform = "translateY(" + autoY + "px)";
+            }
+            requestAnimationFrame(rafLoop);
+          }
+          requestAnimationFrame(rafLoop);
+
+          riseEl.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            autoPaused = true;
+            const delta = e.deltaY;
+            autoY -= delta;
+            if (Math.abs(autoY) >= halfHeight){
+              autoY += (autoY > 0 ? -1 : 1) * halfHeight;
+            }
+            listEl.style.transform = "translateY(" + autoY + "px)";
+
+            clearTimeout(riseEl._wheelTimeout);
+            riseEl._wheelTimeout = setTimeout(() => {
+              autoPaused = false;
+            }, 2000);
+          }, { passive:false });
+        }
+
+        // floating background text
+        const bgStreams = document.getElementById("bgStreams");
+        if (bgStreams) {
+          const codeSnips = [
+            "fetch('/api/domains')",
+            "deploy('edge-functions')",
+            "async mintPrompt() { }",
+            "const lead = qualify(domain)",
+            "if(offer > floor) accept();"
+          ];
+          const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
+          const domainWords = [
+            "BostonCPAFirm.com",
+            "HomebuyersDubai.com",
+            "HomebuyersToronto.com",
+            "TopRealtorOrlando.com"
+          ];
+
+          function spawnChips(count){
+            for(let i=0;i<count;i++){
+              const el = document.createElement("span");
+              el.classList.add("bg-chip");
+              const mode = Math.random();
+              if (mode < .33) el.classList.add("code");
+              else if (mode < .66) el.classList.add("alt");
+
+              const pickArr = mode < .33 ? codeSnips : (mode < .66 ? domainWords : promptWords);
+              el.textContent = pickArr[Math.floor(Math.random()*pickArr.length)];
+
+              const x = Math.random()*100;
+              const y = Math.random()*100;
+              const delay = Math.random()*8;
+              const duration = 6 + Math.random()*6;
+
+              el.style.left = x + "%";
+              el.style.top = y + "%";
+              el.style.animationDuration = duration + "s";
+              el.style.animationDelay = (-delay) + "s";
+
+              bgStreams.appendChild(el);
+            }
+          }
+          spawnChips(28);
+        }
+
+        // domain-specific background photos
+        const bgPhoto = document.getElementById("bgPhoto");
+        if (bgPhoto && listEl && riseEl) {
+          const domainBgMap = {
+            "bostoncpafirm.com":   "photo/BostonCPAFirm.png",
+            "homebuyersdubai.com": "photo/HomebuyersDubai.png",
+            "homebuyerstoronto.com":"photo/HomebuyersToronto.png",
+            "toprealtororlando.com":"photo/TopRealtorOrlando.png",
+            "lasvegasleadgen.com": "photo/LasVegasLeadGen.png",
+            "floridavac.com":      "photo/floridavac.png",
+            "credentialleak.com":  "photo/CredentialLeak.png",
+            "dentalbellevue.com":  "photo/DentalBellevue.png",
+            "sanjoseroofs.com":    "photo/SanJoseRoofs.png"
+          };
+
+          function applyDomainBg(domainText){
+            const key = domainText.trim().toLowerCase();
+            const img = domainBgMap[key];
+            if (!img) return;
+            document.body.classList.add("domain-bg-on");
+            bgPhoto.style.backgroundImage = "url('" + img + "')";
+          }
+          function clearDomainBg(){
+            document.body.classList.remove("domain-bg-on");
+            bgPhoto.style.backgroundImage = "";
+          }
+
+          const domainLinks = listEl.querySelectorAll("a");
+          domainLinks.forEach(a => {
+            const name = a.textContent;
+            a.addEventListener("mouseenter", () => applyDomainBg(name));
+          });
+          riseEl.addEventListener("mouseleave", clearDomainBg);
+        }
+
+        // prompt typing
+        const promptFloat = document.getElementById("promptFloat");
+        if (promptFloat) {
+          const promptWordsUI = ["PROMPT", "IDEA", "SYSTEM", "CHAIN", "VISION"];
+          let pw = 0;
+          function runPrompt(){
+            const word = promptWordsUI[pw];
+            promptFloat.style.opacity = "1";
+            promptFloat.style.transform = "translateY(0)";
+            promptFloat.style.transition = "";
+            promptFloat.innerHTML = '<span id="promptText"></span><span class="prompt-caret"></span>';
+            const promptText = document.getElementById("promptText");
+            let pc = 0;
+            const type = () => {
+              if (promptText) promptText.textContent = word.slice(0, pc);
+              pc++;
+              if (pc <= word.length){
+                setTimeout(type, 65);
+              } else {
+                setTimeout(() => {
+                  promptFloat.style.transition = "transform 1.1s ease, opacity 1.1s ease";
+                  promptFloat.style.transform = "translateY(-95px)";
+                  promptFloat.style.opacity = "0";
+                  setTimeout(() => {
+                    pw = (pw + 1) % promptWordsUI.length;
+                    runPrompt();
+                  }, 1150);
+                }, 420);
+              }
+            };
+            type();
+          }
+          runPrompt();
+        }
+
+        // code typing on laptop
+        const codeTypingEl = document.getElementById("codeTyping");
+        if (codeTypingEl) {
+          const codeLines = [
+            "const idea = build('domain-store');",
+            "git push origin main",
+            "deploy('github-pages');",
+            "pinTraffic -> landing -> GoDaddy"
+          ];
+          let lineIndex = 0, charIndex = 0;
+          function typeLoop(){
+            const line = codeLines[lineIndex];
+            codeTypingEl.textContent = line.slice(0, charIndex);
+            charIndex++;
+            if (charIndex <= line.length) setTimeout(typeLoop, 42);
+            else {
+              setTimeout(() => {
+                const erase = () => {
+                  charIndex--;
+                  codeTypingEl.textContent = line.slice(0, charIndex);
+                  if (charIndex > 0) setTimeout(erase, 18);
+                  else {
+                    lineIndex = (lineIndex + 1) % codeLines.length;
+                    setTimeout(typeLoop, 250);
+                  }
+                };
+                erase();
+              }, 700);
+            }
+          }
+          typeLoop();
+        }
+
+        // focus mode + panels
+        const cardDomains = document.getElementById("cardDomains");
+        const cardContact = document.getElementById("cardContact");
+        let timers = [];
+
+        function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+        function resetAll(){
+          clearTimers();
+          document.body.classList.remove("focus-domains","focus-contact","domains-panel-on","domains-rise-on","contact-panel-on");
+          const domainWall = document.getElementById("domainWall");
+          const contactPanel = document.getElementById("contactPanel");
+          if (domainWall) domainWall.setAttribute("aria-hidden","true");
+          if (contactPanel) contactPanel.setAttribute("aria-hidden","true");
+          if (bgPhoto) {
+            document.body.classList.remove("domain-bg-on");
+            bgPhoto.style.backgroundImage = "";
+          }
+        }
+
+        if (cardDomains) {
+          cardDomains.addEventListener("mouseenter", () => {
+            resetAll();
+            document.body.classList.add("focus-domains");
+
+            timers.push(setTimeout(() => {
+              document.body.classList.add("domains-panel-on");
+              const domainWall = document.getElementById("domainWall");
+              if (domainWall) domainWall.setAttribute("aria-hidden","false");
+            }, 240));
+
+            timers.push(setTimeout(() => {
+              document.body.classList.add("domains-rise-on");
+            }, 240 + 180));
+          });
+        }
+
+        if (cardContact) {
+          cardContact.addEventListener("mouseenter", () => {
+            resetAll();
+            document.body.classList.add("focus-contact");
+
+            timers.push(setTimeout(() => {
+              document.body.classList.add("contact-panel-on");
+              const contactPanel = document.getElementById("contactPanel");
+              if (contactPanel) contactPanel.setAttribute("aria-hidden","false");
+            }, 120));
+          });
+        }
+
+        document.addEventListener("mousemove", (e) => {
+          const inside = e.target.closest("#stage, #domainWall, #contactPanel, #cardDomains, #cardContact");
+          if (!inside) resetAll();
+        });
+
+        // click routes
+        const cardPrompts = document.getElementById("cardPrompts");
+        const cardCode = document.getElementById("cardCode");
+        const cardExtension = document.getElementById("cardExtension");
+
+        if (cardPrompts) {
+          cardPrompts.addEventListener("click", () => window.location.href = "prompts/");
+        }
+        if (cardCode) {
+          cardCode.addEventListener("click", () => window.location.href = "code/");
+        }
+        if (cardDomains) {
+          cardDomains.addEventListener("click", () => window.location.href = "domains/");
+        }
+        if (cardExtension) {
+          cardExtension.addEventListener("click", () => window.location.href = "extension/");
+        }
       }
-    }
-    typeLoop();
 
-    // focus mode + panels
-    const cardDomains = document.getElementById("cardDomains");
-    const cardContact = document.getElementById("cardContact");
-    let timers = [];
-
-    function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
-    function resetAll(){
-      clearTimers();
-      document.body.classList.remove("focus-domains","focus-contact","domains-panel-on","domains-rise-on","contact-panel-on");
-      document.getElementById("domainWall").setAttribute("aria-hidden","true");
-      document.getElementById("contactPanel").setAttribute("aria-hidden","true");
-      clearDomainBg();
-    }
-
-    cardDomains.addEventListener("mouseenter", () => {
-      resetAll();
-      document.body.classList.add("focus-domains");
-
-      timers.push(setTimeout(() => {
-        document.body.classList.add("domains-panel-on");
-        document.getElementById("domainWall").setAttribute("aria-hidden","false");
-      }, 240));
-
-      timers.push(setTimeout(() => {
-        document.body.classList.add("domains-rise-on");
-      }, 240 + 180));
-    });
-
-    cardContact.addEventListener("mouseenter", () => {
-      resetAll();
-      document.body.classList.add("focus-contact");
-
-      timers.push(setTimeout(() => {
-        document.body.classList.add("contact-panel-on");
-        document.getElementById("contactPanel").setAttribute("aria-hidden","false");
-      }, 120));
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      const inside = e.target.closest("#stage, #domainWall, #contactPanel, #cardDomains, #cardContact");
-      if (!inside) resetAll();
-    });
-
-    // click routes (بدون / في البداية)
-    document.getElementById("cardPrompts").addEventListener("click", () => window.location.href = "prompts/");
-    document.getElementById("cardCode").addEventListener("click", () => window.location.href = "code/");
-    cardDomains.addEventListener("click", () => window.location.href = "domains/");
-
-    // Extension card click route
-    const cardExtension = document.getElementById("cardExtension");
-    if (cardExtension){
-      cardExtension.addEventListener("click", () => {
-        window.location.href = "extension/";
-      });
-    }
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
   </script>
 </Layout>
