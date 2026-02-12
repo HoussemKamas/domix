@@ -1,0 +1,356 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type ExtensionItem = {
+  id?: number | string;
+  name?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  type?: string;
+  price?: number | string;
+  logo?: string;
+  poster?: string;
+};
+
+type DomixData = {
+  domains?: any[];
+  prompts?: any[];
+  code?: any[];
+  extensions: ExtensionItem[];
+};
+
+let data: DomixData = { extensions: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// ترتيب الإضافات من الأحدث للأقدم
+const byIdDesc = (a: ExtensionItem, b: ExtensionItem) =>
+  Number(b.id ?? 0) - Number(a.id ?? 0);
+
+const allExtensions = [...(data.extensions ?? [])].sort(byIdDesc);
+---
+
+<Layout title="DOMIX Extensions">
+  <div class="bg-orbit"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-streams" id="bgStreams"></div>
+
+  <main class="page">
+    <header class="page-head">
+      <div class="badge-top">
+        <span class="badge-dot"></span>
+        <span>Browser extensions hub</span>
+      </div>
+      <h1>DOMIX Extensions</h1>
+      <p class="lead">
+        Discover DOMIX browser extensions to generate leads, protect focus, and
+        automate your daily workflow.
+      </p>
+    </header>
+
+    {allExtensions.length === 0 ? (
+      <p style="margin-top: 16px; color:#a0a0a0;">
+        لا توجد إضافات بعد، يمكنك إضافتها من لوحة الأدمن أو تعديل domix.json.
+      </p>
+    ) : (
+      <section class="extensions-grid">
+        {allExtensions.map((item) => {
+          const id = item.id ?? '';
+          const name = item.name ?? item.title ?? 'Untitled extension';
+          const priceNum = Number(item.price ?? 0);
+          const isFree = !priceNum || priceNum === 0;
+          const priceLabel = isFree ? 'Free' : `$${priceNum}`;
+          const logo =
+            item.logo ??
+            item.poster ??
+            '/images/extension-placeholder.png';
+
+          return (
+            <a href={`/extension-details#${id}`} class="ext-card">
+              <div class="ext-logo">
+                <img src={logo} alt={name} loading="lazy" />
+              </div>
+              <div class="ext-body">
+                <h3 class="ext-name">{name}</h3>
+                <p class={`ext-price ${isFree ? 'free' : 'paid'}`}>
+                  {priceLabel}
+                </p>
+              </div>
+            </a>
+          );
+        })}
+      </section>
+    )}
+  </main>
+
+  <style>
+    :root{
+      --bg-dark:#050505;
+      --text-dim:#a0a0a0;
+      --neon-blue:#00f3ff;
+      --neon-green:#00ff88;
+      --neon-orange:#ff9d00;
+      --radius: 20px;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at 10% 0%, #101322, #050505 52%, #020308 100%);
+      color:#fff;
+      overflow-x:hidden;
+    }
+
+    .bg-grid{
+      position:fixed;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(0,243,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,243,255,.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity:.16;
+      mix-blend-mode:screen;
+      animation:gridShift 20s linear infinite;
+      z-index:-3;
+    }
+    @keyframes gridShift{
+      0%{ transform:translateY(0) scale(1); }
+      100%{ transform:translateY(60px) scale(1.03); }
+    }
+
+    .bg-orbit{
+      position:fixed;
+      inset:-10%;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(0,243,255,.25), transparent 55%),
+        radial-gradient(circle at 85% 80%, rgba(188,19,254,.22), transparent 60%);
+      opacity:.65;
+      filter: blur(6px);
+      mix-blend-mode:screen;
+      z-index:-4;
+      animation:orbitFade 16s ease-in-out infinite alternate;
+    }
+    @keyframes orbitFade{
+      0%{ transform:translate3d(0,0,0); opacity:.45; }
+      50%{ transform:translate3d(0,-12px,0); opacity:.8; }
+      100%{ transform:translate3d(0,10px,0); opacity:.5; }
+    }
+
+    .bg-streams{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-2;
+      mix-blend-mode:screen;
+      overflow:hidden;
+    }
+    .chip{
+      position:absolute;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      color:rgba(0,243,255,.4);
+      text-shadow:
+        0 0 8px rgba(0,243,255,.7),
+        0 0 22px rgba(0,243,255,.35);
+      opacity:0;
+      animation:chipDrift 11s linear infinite;
+    }
+    .chip.alt{
+      color:rgba(188,19,254,.45);
+      text-shadow:
+        0 0 8px rgba(188,19,254,.8),
+        0 0 22px rgba(188,19,254,.4);
+    }
+    @keyframes chipDrift{
+      0%{
+        opacity:0;
+        transform:translate3d(-12px,16px,0) scale(.9);
+        filter:blur(2px);
+      }
+      10%{
+        opacity:.95;
+        filter:blur(0);
+      }
+      60%{
+        opacity:.8;
+      }
+      95%{
+        opacity:0;
+        filter:blur(1px);
+      }
+      100%{
+        transform:translate3d(18px,-44px,0) scale(1.02);
+      }
+    }
+
+    .page{
+      position:relative;
+      padding: 40px 18px 60px;
+      max-width: 1180px;
+      margin:0 auto;
+    }
+
+    header.page-head{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:32px;
+    }
+    .badge-top{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:5px 11px 5px 6px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.42);
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--text-dim);
+    }
+    .badge-dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, #fff, var(--neon-green));
+      box-shadow:0 0 16px rgba(0,255,136,.75);
+    }
+
+    h1{
+      font-size: clamp(2.4rem, 4vw, 3.2rem);
+      letter-spacing:4px;
+      text-transform:uppercase;
+      text-shadow:0 0 22px rgba(255,255,255,.28);
+    }
+    .lead{
+      max-width:620px;
+      color:var(--text-dim);
+      line-height:1.6;
+      font-size:.98rem;
+    }
+
+    .extensions-grid{
+      margin-top:32px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+      gap:22px;
+    }
+
+    .ext-card{
+      position:relative;
+      padding:16px;
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.12);
+      text-decoration:none;
+      color:#fff;
+      overflow:hidden;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      transition:transform .26s ease, box-shadow .26s ease, border-color .26s ease, background .26s ease;
+      backdrop-filter:blur(10px);
+    }
+    .ext-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 18px 40px rgba(0,0,0,.75);
+      border-color:rgba(0,243,255,.32);
+      background:rgba(0,0,0,.54);
+    }
+
+    .ext-logo{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.2);
+      background:#020308;
+      display:grid;
+      place-items:center;
+    }
+    .ext-logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .ext-body{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .ext-name{
+      font-size:1rem;
+      letter-spacing:.04em;
+    }
+    .ext-price{
+      font-size:.9rem;
+      font-weight:700;
+    }
+    .ext-price.free{
+      color:var(--neon-green);
+      text-shadow:0 0 10px rgba(0,255,136,.4);
+    }
+    .ext-price.paid{
+      color:var(--neon-orange);
+      text-shadow:0 0 10px rgba(255,157,0,.4);
+    }
+  </style>
+
+  <script>
+    const words = [
+      "EXTENSION", "ADD-ON", "LEADS", "DOMIX", "FOCUS", "TABS",
+      "AUTOMATION", "PIPELINE", "BROWSER", "AGENT", "PROMPT"
+    ];
+    const bgStreams = document.getElementById("bgStreams");
+
+    function spawnChips(count){
+      for(let i=0;i<count;i++){
+        const el = document.createElement("span");
+        el.classList.add("chip");
+        if(Math.random() < .45) el.classList.add("alt");
+        el.textContent = words[Math.floor(Math.random()*words.length)];
+
+        const x = Math.random()*100;
+        const y = Math.random()*100;
+        const delay = Math.random()*10;
+        const duration = 10 + Math.random()*8;
+
+        el.style.left = x + "%";
+        el.style.top = y + "%";
+        el.style.animationDuration = duration + "s";
+        el.style.animationDelay = (-delay) + "s";
+
+        bgStreams.appendChild(el);
+      }
+    }
+    spawnChips(26);
+  </script>
+</Layout>

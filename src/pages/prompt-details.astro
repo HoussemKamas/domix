@@ -1,0 +1,879 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type PromptItem = {
+  id?: number | string;
+  title?: string;
+  type?: string;
+  price?: number | string;
+  description?: string;
+  image?: string;
+};
+
+type DomixData = {
+  domains?: any[];
+  prompts: PromptItem[];
+  code?: any[];
+  extensions?: any[];
+};
+
+let data: DomixData = { prompts: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// ترتيب البرومبتات من الأحدث للأقدم
+const byIdDesc = (a: PromptItem, b: PromptItem) =>
+  Number(b.id ?? 0) - Number(a.id ?? 0);
+
+const allPrompts = [...(data.prompts ?? [])].sort(byIdDesc);
+
+// أمثلة افتراضية في حال كانت الداتا فارغة
+const fallbackFree: PromptItem = {
+  title: 'Lead Gen Prompt',
+  type: 'General',
+  price: 0,
+  description:
+    'Generates a powerful lead generation message for your niche, with a clear CTA and a short follow-up.'
+};
+
+const fallbackPaid: PromptItem = {
+  title: 'Clinic Appointment Prompt',
+  type: 'General',
+  price: 9,
+  description:
+    'A conversion-focused appointment booking prompt for clinics, including objections handling and follow-up.'
+};
+
+// اختيار برومبت مجاني ومدفوع من domix.json إن وجد
+const freeItem: PromptItem =
+  allPrompts.find((p) => !Number(p.price ?? 0)) ??
+  allPrompts[0] ??
+  fallbackFree;
+
+const paidItem: PromptItem =
+  allPrompts.find((p) => Number(p.price ?? 0) > 0) ??
+  allPrompts[1] ??
+  allPrompts[0] ??
+  fallbackPaid;
+
+const freePriceNum = Number(freeItem.price ?? 0);
+const paidPriceNum = Number(paidItem.price ?? 0);
+
+const freePriceLabel = freePriceNum ? `$${freePriceNum}` : 'Free';
+const paidPriceLabel = paidPriceNum ? `$${paidPriceNum}` : '$9';
+---
+
+<Layout title="DOMIX — Prompt Details">
+  <div class="aurora"></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="spark" aria-hidden="true"></canvas>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+
+  <main class="wrap">
+    <div class="topbar">
+      <div class="crumbs">
+        <a href="/">Home</a>
+        <span class="slash">/</span>
+        <a href="/prompts">Prompts</a>
+        <span class="slash">/</span>
+        <span
+          id="crumbName"
+          data-free={freeItem.title ?? 'Free Prompt'}
+          data-paid={paidItem.title ?? 'Paid Prompt'}
+        >
+          {freeItem.title ?? 'Prompt Details'}
+        </span>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="/prompts">← All Prompts</a>
+        <a class="btn" href="#free">Free Preview</a>
+        <a class="btn" href="#paid">Paid Preview</a>
+      </div>
+    </div>
+
+    {/* FREE */}
+    <section class="panel" id="freePanel">
+      <header class="hero">
+        <div class="orbit" aria-hidden="true">
+          <svg viewBox="0 0 1200 280" preserveAspectRatio="none">
+            <path d="M20,190 C220,60 360,260 560,140 C740,30 940,240 1180,90" />
+            <path
+              d="M-10,230 C220,150 380,300 600,180 C820,60 980,250 1220,140"
+              style="opacity:.45"
+            />
+          </svg>
+        </div>
+
+        <div class="heroTop">
+          <div>
+            <h1 class="title" id="freeTitle">
+              {freeItem.title ?? 'Lead Gen Prompt'}
+            </h1>
+            <p class="desc">
+              {freeItem.description ??
+                'A clean, focused detail page: purpose + media gallery + the full prompt (free items only).'}
+            </p>
+          </div>
+
+          <div class="pills">
+            <span class="pill free">
+              <span class="dot"></span>FREE
+            </span>
+            <span class="pill free">
+              <span class="dot"></span>Price: {freePriceLabel}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <article class="card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Purpose / Description
+            </div>
+            <p class="p">
+              {freeItem.description ??
+                'Generates a powerful lead generation message for your niche, with a clear CTA and a short follow-up.'}
+            </p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Media gallery
+            </div>
+            <div class="gallery">
+              <div class="gItem">
+                <img src="/images/prompt-placeholder.jpg" alt="Media" />
+              </div>
+              <div class="gItem">
+                <img src="/images/prompt-placeholder.jpg" alt="Media" />
+              </div>
+              <div class="gItem">
+                <img src="/images/prompt-placeholder.jpg" alt="Media" />
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="side card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Prompt
+            </div>
+            <div class="box mono">
+{`You are a marketing assistant.
+Write a short WhatsApp message for: {niche}
+Goal: generate a lead.
+Tone: friendly, confident.
+Add a CTA asking for a quick reply.`}
+            </div>
+            <div class="hint">
+              Free item → the full prompt is shown here (يمكنك استبداله بنص
+              البرومبت الحقيقي).
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {/* PAID */}
+    <section class="panel" id="paidPanel">
+      <header class="hero">
+        <div class="orbit" aria-hidden="true">
+          <svg viewBox="0 0 1200 280" preserveAspectRatio="none">
+            <path d="M20,200 C220,80 360,260 560,150 C740,20 940,240 1180,95" />
+            <path
+              d="M-10,240 C220,150 380,310 600,190 C820,70 980,260 1220,150"
+              style="opacity:.45"
+            />
+          </svg>
+        </div>
+
+        <div class="heroTop">
+          <div>
+            <h1 class="title" id="paidTitle">
+              {paidItem.title ?? 'Clinic Appointment Prompt'}
+            </h1>
+            <p class="desc">
+              {paidItem.description ??
+                'Paid item → show purpose + gallery, but hide the prompt and show purchase buttons.'}
+            </p>
+          </div>
+
+          <div class="pills">
+            <span class="pill">
+              <span class="dot"></span>PAID
+            </span>
+            <span class="pill">
+              <span class="dot"></span>Price:{' '}
+              {paidPriceNum ? `$${paidPriceNum}` : paidPriceLabel}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <article class="card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Purpose / Description
+            </div>
+            <p class="p">
+              {paidItem.description ??
+                'A conversion-focused appointment booking prompt for clinics, including objections handling and follow-up.'}
+            </p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Media gallery
+            </div>
+            <div class="gallery">
+              <div class="gItem">
+                <img src="/images/prompt-placeholder.jpg" alt="Media" />
+              </div>
+              <div class="gItem">
+                <img src="/images/prompt-placeholder.jpg" alt="Media" />
+              </div>
+              <div class="gItem">
+                <video controls playsinline preload="metadata">
+                  <source src="" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+            <div class="hint">
+              (Video placeholder — add your MP4 later and it will play here.)
+            </div>
+          </div>
+        </article>
+
+        <aside class="side card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Buy the Prompt
+            </div>
+
+            <div class="buyRow">
+              <a
+                class="buyBtn whatsapp"
+                id="waBtn"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                data-title={paidItem.title ?? 'Prompt'}
+                data-price={
+                  paidPriceNum ? `$${paidPriceNum}` : paidPriceLabel
+                }
+              >
+                <span class="ico">💬</span>
+                <div>
+                  <div style="font-weight:950;">Buy via WhatsApp</div>
+                  <div
+                    style="color:rgba(255,255,255,.74); font-size:.92rem;"
+                  >
+                    Fast reply • payment discussion
+                  </div>
+                </div>
+              </a>
+
+              <a
+                class="buyBtn facebook"
+                href="https://www.facebook.com/houssem.kamas.2025"
+                target="_blank"
+                rel="noopener"
+              >
+                <span class="ico">ⓕ</span>
+                <div>
+                  <div style="font-weight:950;">Buy via Facebook</div>
+                  <div
+                    style="color:rgba(255,255,255,.74); font-size:.92rem;"
+                  >
+                    Message me directly
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="hint">
+              Paid item → prompt text is hidden on purpose.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    :root{
+      --purple:#bc13fe;
+      --violet:#7c3aed;
+      --ink:#070611;
+
+      --panel: rgba(255,255,255,.09);
+      --panel2: rgba(255,255,255,.045);
+      --border: rgba(255,255,255,.16);
+
+      --radius: 22px;
+      --shadow: 0 22px 70px rgba(0,0,0,.24);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:#fff;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 900px at 10% 15%, rgba(188,19,254,.20), transparent 60%),
+        radial-gradient(1000px 800px at 90% 22%, rgba(124,58,237,.16), transparent 62%),
+        radial-gradient(900px 700px at 55% 95%, rgba(255,255,255,.10), transparent 62%),
+        linear-gradient(180deg, #1a0f2f, #0b0816 60%, #070611);
+    }
+
+    canvas#stars, canvas#spark{
+      position:fixed; inset:0;
+      pointer-events:none;
+    }
+    canvas#stars{ z-index:-6; }
+    canvas#spark{ z-index:-4; mix-blend-mode: screen; opacity:.92; }
+
+    .aurora{
+      position:fixed; inset:-25%;
+      z-index:-7; pointer-events:none;
+      filter: blur(44px) saturate(1.2);
+      opacity:.82;
+      background:
+        radial-gradient(720px 420px at 16% 30%, rgba(188,19,254,.33), transparent 68%),
+        radial-gradient(800px 540px at 86% 26%, rgba(124,58,237,.28), transparent 70%),
+        radial-gradient(860px 580px at 55% 84%, rgba(255,255,255,.12), transparent 72%);
+      animation: auroraDrift 14s ease-in-out infinite;
+    }
+    @keyframes auroraDrift{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(0,-14px,0) scale(1.03); }
+    }
+
+    .grain{
+      position:fixed; inset:0; z-index:-3; pointer-events:none;
+      opacity:.18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 260px 260px;
+      mix-blend-mode: overlay;
+    }
+
+    .vignette{
+      position:fixed; inset:0; z-index:-2; pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(255,255,255,.07), transparent 55%),
+        radial-gradient(circle at 50% 60%, rgba(0,0,0,.14), rgba(0,0,0,.58));
+      opacity:.86;
+    }
+
+    .wrap{
+      width:min(1160px, 92vw);
+      margin:0 auto;
+      padding: 34px 0 88px;
+      position:relative;
+      z-index:2;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 18px;
+    }
+
+    .crumbs{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      color: rgba(255,255,255,.86);
+      font-size:.94rem;
+      letter-spacing:.2px;
+    }
+    .crumbs a{
+      color: rgba(255,255,255,.92);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(255,255,255,.18);
+      padding-bottom: 2px;
+    }
+    .crumbs a:hover{ border-bottom-color: rgba(188,19,254,.45); }
+    .slash{ opacity:.55; }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .btn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      color:#fff;
+      border-radius: 16px;
+      padding: 10px 13px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.16);
+      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s.ease;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(188,19,254,.38);
+      box-shadow: 0 0 44px rgba(188,19,254,.14), 0 10px 30px rgba(0,0,0,.20);
+      background: rgba(255,255,255,.085);
+    }
+
+    .hero{
+      position:relative;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding: 18px 18px 16px;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:-65%;
+      background:
+        radial-gradient(circle at 25% 20%, rgba(255,255,255,.22), transparent 60%),
+        radial-gradient(circle at 70% 45%, rgba(188,19,254,.22), transparent 62%),
+        radial-gradient(circle at 55% 85%, rgba(124,58,237,.14), transparent 62%);
+      transform: rotate(12deg);
+      opacity:.55;
+      pointer-events:none;
+    }
+    .orbit{
+      position:absolute; inset:0;
+      pointer-events:none;
+      opacity:.9;
+      mask-image: radial-gradient(circle at 50% 40%, #000 0 62%, transparent 86%);
+    }
+    .orbit svg{
+      width:100%; height:100%;
+      display:block;
+      filter: drop-shadow(0 0 18px rgba(188,19,254,.18));
+    }
+    .orbit path{
+      stroke: rgba(188,19,254,.35);
+      stroke-width: 1.2;
+      fill:none;
+      stroke-dasharray: 6 10;
+      animation: dash 14s linear infinite;
+    }
+    @keyframes dash{
+      to{ stroke-dashoffset: -220; }
+    }
+
+    .heroTop{
+      position:relative;
+      z-index:2;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .title{
+      font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+      font-weight: 950;
+      letter-spacing: .3px;
+      text-shadow: 0 0 34px rgba(188,19,254,.14);
+      margin:0;
+    }
+    .desc{
+      margin: 8px 0 0 0;
+      color: rgba(255,255,255,.84);
+      line-height: 1.35;
+      max-width: 720px;
+      font-size: .98rem;
+      letter-spacing:.2px;
+    }
+
+    .pills{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(14px);
+      font-size: .88rem;
+      color: rgba(255,255,255,.92);
+      letter-spacing:.2px;
+    }
+    .pill .dot{
+      width:8px; height:8px; border-radius:50%;
+      background: rgba(188,19,254,.98);
+      box-shadow: 0 0 18px rgba(188,19,254,.60), 0 0 40px rgba(188,19,254,.18);
+    }
+    .pill.free .dot{
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 0 18px rgba(255,255,255,.34);
+    }
+
+    .layout{
+      margin-top: 16px;
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+
+    .section{
+      padding: 16px 16px;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+    .section:first-child{ border-top:none; }
+
+    .k{
+      color: rgba(255,255,255,.78);
+      font-weight: 950;
+      letter-spacing:.35px;
+      text-transform: uppercase;
+      font-size:.80rem;
+      margin: 0 0 10px 0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .k .spark{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(188,19,254,.98);
+      box-shadow: 0 0 18px rgba(188,19,254,.55);
+    }
+    .p{
+      margin:0;
+      color: rgba(255,255,255,.90);
+      line-height: 1.55;
+      letter-spacing:.15px;
+      font-size: .98rem;
+    }
+
+    .gallery{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+    @media (max-width: 880px){ .gallery{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 520px){ .gallery{ grid-template-columns: 1fr;} }
+
+    .gItem{
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.10);
+      position:relative;
+    }
+    .gItem::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.18), transparent 55%);
+      opacity:.45;
+      pointer-events:none;
+    }
+    .gItem img{
+      width:100%;
+      height: 190px;
+      object-fit: cover;
+      display:block;
+      filter: saturate(1.02);
+    }
+    .gItem video{
+      width:100%;
+      height: 230px;
+      background:#000;
+      display:block;
+    }
+
+    .side{ position: sticky; top: 16px; }
+    @media (max-width: 980px){ .side{ position: static; } }
+
+    .box{
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.14);
+      padding: 14px;
+      overflow:auto;
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.48;
+      white-space: pre;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 0 12px rgba(188,19,254,.14);
+    }
+
+    .buyRow{ display:flex; flex-direction:column; gap: 12px; }
+    .buyBtn{
+      border-radius: 18px;
+      padding: 14px 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      text-decoration:none;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s.ease;
+      backdrop-filter: blur(14px);
+    }
+    .buyBtn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.085); }
+    .ico{
+      width: 38px; height: 38px; border-radius: 14px;
+      display:grid; place-items:center;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.12);
+      box-shadow: 0 0 22px rgba(188,19,254,.10);
+      font-size: 16px;
+    }
+    .buyBtn.whatsapp:hover{
+      border-color: rgba(188,19,254,.40);
+      box-shadow: 0 0 60px rgba(188,19,254,.18);
+    }
+    .buyBtn.facebook:hover{
+      border-color: rgba(124,58,237,.40);
+      box-shadow: 0 0 60px rgba(124,58,237,.18);
+    }
+
+    .hint{
+      margin-top: 10px;
+      color: rgba(255,255,255,.74);
+      font-size: .92rem;
+      letter-spacing:.2px;
+    }
+
+    .panel{ display:none; }
+    .panel.active{ display:block; }
+  </style>
+
+  <script>
+    // تبديل Free / Paid حسب الـ hash
+    function renderPanel(){
+      const h = (location.hash || "#free").toLowerCase();
+      const free = document.getElementById("freePanel");
+      const paid = document.getElementById("paidPanel");
+      free.classList.remove("active");
+      paid.classList.remove("active");
+      const isPaid = (h === "#paid");
+      (isPaid ? paid : free).classList.add("active");
+
+      const crumb = document.getElementById("crumbName");
+      if (crumb){
+        const freeName = crumb.dataset.free || "Free Prompt";
+        const paidName = crumb.dataset.paid || "Paid Prompt";
+        crumb.textContent = isPaid ? paidName : freeName;
+      }
+    }
+    window.addEventListener("hashchange", renderPanel);
+    renderPanel();
+
+    // رابط واتساب للبرومبت المدفوع
+    const phone = "213781302576";
+    function buildWhatsApp(title, price, type){
+      const msg = `DOMIX Inquiry - ${type} - ${title} - ${price}`;
+      return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    }
+    const waBtn = document.getElementById("waBtn");
+    if (waBtn){
+      const title = waBtn.dataset.title || "Prompt";
+      const price = waBtn.dataset.price || "Price";
+      waBtn.href = buildWhatsApp(title, price, "Prompt");
+    }
+
+    // نجوم + Sparks
+    const starsCanvas = document.getElementById("stars");
+    const sparkCanvas = document.getElementById("spark");
+    const sctx = starsCanvas.getContext("2d");
+    const pctx = sparkCanvas.getContext("2d");
+
+    let W=0,H=0,DPR=1;
+    const rand=(a,b)=>Math.random()*(b-a)+a;
+
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = Math.floor(innerWidth);
+      H = Math.floor(innerHeight);
+
+      starsCanvas.width = Math.floor(W*DPR);
+      starsCanvas.height = Math.floor(H*DPR);
+      starsCanvas.style.width = W+"px";
+      starsCanvas.style.height = H+"px";
+
+      sparkCanvas.width = Math.floor(W*DPR);
+      sparkCanvas.height = Math.floor(H*DPR);
+      sparkCanvas.style.width = W+"px";
+      sparkCanvas.style.height = H+"px";
+
+      sctx.setTransform(DPR,0,0,DPR,0,0);
+      pctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    addEventListener("resize", resize);
+    resize();
+
+    const layers = [
+      { count: 150, speed: 0.16, r:[0.7,1.4], a:[0.55,0.95] },
+      { count: 120, speed: 0.32, r:[0.9,1.9], a:[0.60,1.00] },
+      { count: 70,  speed: 0.58, r:[1.2,2.6], a:[0.75,1.00] }
+    ];
+    const stars=[];
+    function seedStars(){
+      stars.length=0;
+      for(const L of layers){
+        for(let i=0;i<L.count;i++){
+          stars.push({
+            x: rand(0,W), y: rand(0,H),
+            r: rand(L.r[0], L.r[1]),
+            s: L.speed * rand(0.7, 1.4),
+            a: rand(L.a[0], L.a[1]),
+            tw: rand(0, Math.PI*2),
+            big: (L.speed > 0.5)
+          });
+        }
+      }
+    }
+    seedStars();
+
+    const particles=[];
+    const MAXP=140;
+    function ambientBurst(n=2){
+      for(let i=0;i<n;i++){
+        if(particles.length>=MAXP) particles.shift();
+        const x = rand(W*0.15, W*0.85);
+        const y = rand(H*0.15, H*0.85);
+        const ang = rand(-Math.PI, Math.PI);
+        const sp = rand(0.3, 1.2);
+        particles.push({
+          x, y,
+          vx: Math.cos(ang)*sp,
+          vy: Math.sin(ang)*sp,
+          r: rand(0.9,2.0),
+          a: rand(0.35,0.7),
+          tw: rand(0, Math.PI*2),
+          life: rand(40, 90)
+        });
+      }
+    }
+
+    function drawStars(){
+      sctx.clearRect(0,0,W,H);
+      for(const s of stars){
+        s.y += s.s;
+        if(s.y > H + 30){ s.y = -30; s.x = rand(0,W); }
+        s.tw += (s.big ? 0.03 : 0.02);
+        const tw = (Math.sin(s.tw)*0.22)+0.86;
+        const alpha = s.a * tw;
+
+        sctx.beginPath();
+        sctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        sctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        sctx.fill();
+
+        sctx.beginPath();
+        sctx.fillStyle = `rgba(255,255,255,${alpha * (s.big ? 0.22 : 0.14)})`;
+        sctx.arc(s.x, s.y, s.r * (s.big ? 6.2 : 4.6), 0, Math.PI*2);
+        sctx.fill();
+
+        sctx.beginPath();
+        sctx.fillStyle = `rgba(188,19,254,${alpha * (s.big ? 0.10 : 0.06)})`;
+        sctx.arc(s.x, s.y, s.r * (s.big ? 9.0 : 6.8), 0, Math.PI*2);
+        sctx.fill();
+      }
+    }
+
+    function drawSparks(){
+      pctx.clearRect(0,0,W,H);
+      pctx.globalCompositeOperation = "lighter";
+
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.992; p.vy *= 0.992;
+        p.life -= 1;
+        p.tw += 0.14;
+
+        const fade = Math.max(0, Math.min(1, p.life/80));
+        const tw = (Math.sin(p.tw)*0.25)+0.85;
+        const a = p.a * fade * tw;
+
+        pctx.beginPath();
+        pctx.fillStyle = `rgba(255,255,255,${a})`;
+        pctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        pctx.fill();
+
+        pctx.beginPath();
+        pctx.fillStyle = `rgba(188,19,254,${a*0.35})`;
+        pctx.arc(p.x, p.y, p.r*3.2, 0, Math.PI*2);
+        pctx.fill();
+
+        if(p.life<=0 || p.x<-80 || p.y<-80 || p.x>W+80 || p.y>H+80){
+          particles.splice(i,1);
+        }
+      }
+      pctx.globalCompositeOperation = "source-over";
+    }
+
+    let t=0;
+    function loop(){
+      drawStars();
+      if((t++ % 8) === 0) ambientBurst(1);
+      drawSparks();
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    let rT;
+    addEventListener("resize", ()=>{
+      clearTimeout(rT);
+      rT=setTimeout(()=>{
+        resize();
+        seedStars();
+      }, 120);
+    });
+  </script>
+</Layout>

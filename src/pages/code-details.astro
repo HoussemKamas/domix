@@ -1,0 +1,821 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type CodeItem = {
+  id?: number | string;
+  title?: string;
+  language?: string;
+  price?: number | string;
+  description?: string;
+  image?: string;
+};
+
+type DomixData = {
+  domains?: any[];
+  prompts?: any[];
+  code: CodeItem[];
+  extensions?: any[];
+};
+
+let data: DomixData = { code: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// ترتيب السكربتات من الأحدث للأقدم
+const byIdDesc = (a: CodeItem, b: CodeItem) =>
+  Number(b.id ?? 0) - Number(a.id ?? 0);
+
+const allCode = [...(data.code ?? [])].sort(byIdDesc);
+
+// اختيار مثال مجاني ومثال مدفوع (إن وجد)
+const fallbackFree: CodeItem = {
+  title: 'UTM Builder',
+  language: 'JavaScript',
+  price: 0,
+  description: 'Builds a URL with UTM parameters for tracking.'
+};
+
+const fallbackPaid: CodeItem = {
+  title: 'Lead Scraper',
+  language: 'Python',
+  price: 19,
+  description: 'Collects lead data, cleans it, exports to CSV with retries.'
+};
+
+const freeItem: CodeItem =
+  allCode.find((i) => !Number(i.price ?? 0)) ??
+  allCode[0] ??
+  fallbackFree;
+
+const paidItem: CodeItem =
+  allCode.find((i) => Number(i.price ?? 0) > 0) ??
+  allCode[1] ??
+  allCode[0] ??
+  fallbackPaid;
+
+const freePriceNum = Number(freeItem.price ?? 0);
+const paidPriceNum = Number(paidItem.price ?? 0);
+
+const freePriceLabel = freePriceNum ? `$${freePriceNum}` : 'Free';
+const paidPriceLabel = paidPriceNum ? `$${paidPriceNum}` : 'Price';
+---
+
+<Layout title="DOMIX — Code Details">
+  <canvas id="matrix" aria-hidden="true"></canvas>
+  <div class="scanline"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <main class="wrap">
+    <div class="topbar">
+      <div class="crumbs">
+        <a href="/">Home</a>
+        <span class="slash">/</span>
+        <a href="/code">Code</a>
+        <span class="slash">/</span>
+        <span
+          id="crumbName"
+          data-free={freeItem.title ?? 'Free code'}
+          data-paid={paidItem.title ?? 'Paid code'}
+        >
+          {freeItem.title ?? 'Free code'}
+        </span>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="/code">← ALL CODE</a>
+        <a class="btn" href="#free">FREE PREVIEW</a>
+        <a class="btn" href="#paid">PAID PREVIEW</a>
+      </div>
+    </div>
+
+    {/* =================== FREE (shows code) =================== */}
+    <section class="panel" id="freePanel">
+      <header class="hero">
+        <div class="heroTop">
+          <div>
+            <h1 class="title" id="freeTitle">
+              {freeItem.title ?? 'Free code'}
+            </h1>
+            <p class="subline">
+              {freeItem.description ??
+                'Free item → shows the full code body under the gallery.'}
+            </p>
+          </div>
+
+          <div class="pills">
+            <span class="pill free">
+              <span class="dot"></span>FREE
+            </span>
+            <span class="pill">
+              <span class="dot"></span>Price: {freePriceLabel}
+            </span>
+            <span class="pill">
+              <span class="dot"></span>
+              Language: {freeItem.language ?? 'Code'}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        {/* LEFT: details + media */}
+        <article class="card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Title
+            </div>
+            <p class="p">{freeItem.title ?? 'Free code'}</p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Language
+            </div>
+            <p class="p">{freeItem.language ?? 'Code'}</p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>What this code does
+            </div>
+            <p class="p">
+              {freeItem.description ??
+                'Builds a URL with UTM parameters (source, medium, campaign) for tracking.'}
+            </p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Media gallery
+            </div>
+
+            <div class="gallery">
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Code preview 1" />
+              </div>
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Code preview 2" />
+              </div>
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Code preview 3" />
+              </div>
+
+              <div class="gItem" style="grid-column: 1 / -1;">
+                <video controls playsinline preload="metadata">
+                  <source src="" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="mediaHint">
+              (Replace the image/video sources with your PNG/MP4 files.)
+            </div>
+          </div>
+        </article>
+
+        {/* RIGHT: Code body (FREE) */}
+        <aside class="side card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Code body
+            </div>
+
+            <div class="codeWrap">
+              <div class="codeTop">
+                <div class="dots" aria-hidden="true">
+                  <span class="dotUI r"></span>
+                  <span class="dotUI y"></span>
+                  <span class="dotUI g"></span>
+                </div>
+                <div class="fileTag">
+                  {(freeItem.title ?? 'script')
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')}.js
+                </div>
+              </div>
+
+              <pre class="codeBox">
+{`// TODO: ضع هنا الكود الحقيقي لهذا السكربت
+function example() {
+  console.log('Replace this with real code from your project');
+}`}
+              </pre>
+            </div>
+
+            <div class="hint">
+              Free item → full code is shown here (you can paste real code
+              instead of the placeholder).
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {/* =================== PAID (hides code) =================== */}
+    <section class="panel" id="paidPanel">
+      <header class="hero">
+        <div class="heroTop">
+          <div>
+            <h1 class="title" id="paidTitle">
+              {paidItem.title ?? 'Paid code'}
+            </h1>
+            <p class="subline">
+              {paidItem.description ??
+                'Paid item → hides code body and shows purchase buttons.'}
+            </p>
+          </div>
+
+          <div class="pills">
+            <span class="pill">
+              <span class="dot"></span>PAID
+            </span>
+            <span class="pill">
+              <span class="dot"></span>Price:{' '}
+              {paidPriceNum ? `$${paidPriceNum}` : 'Ask'}
+            </span>
+            <span class="pill">
+              <span class="dot"></span>
+              Language: {paidItem.language ?? 'Code'}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        {/* LEFT: details + media */}
+        <article class="card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Title
+            </div>
+            <p class="p">{paidItem.title ?? 'Paid code'}</p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Language
+            </div>
+            <p class="p">{paidItem.language ?? 'Code'}</p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>What this code does
+            </div>
+            <p class="p">
+              {paidItem.description ??
+                'Collects lead data, cleans it, exports to CSV — includes retries + rate-limit handling (paid version).'}
+            </p>
+          </div>
+
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Media gallery
+            </div>
+
+            <div class="gallery">
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Media PNG 1" />
+              </div>
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Media PNG 2" />
+              </div>
+              <div class="gItem">
+                <img src="/images/code-placeholder.jpg" alt="Media PNG 3" />
+              </div>
+
+              <div class="gItem" style="grid-column: 1 / -1;">
+                <video controls playsinline preload="metadata">
+                  <source src="" type="video/mp4" />
+                </video>
+              </div>
+            </div>
+
+            <div class="mediaHint">
+              (Paid items still show media. Code stays hidden.)
+            </div>
+          </div>
+        </article>
+
+        {/* RIGHT: Buy buttons (PAID) */}
+        <aside class="side card">
+          <div class="section">
+            <div class="k">
+              <span class="spark"></span>Buy the Code
+            </div>
+
+            <div class="buyRow">
+              <a
+                class="buyBtn"
+                id="waBtn"
+                href="#"
+                target="_blank"
+                rel="noopener"
+                data-title={paidItem.title ?? 'Code'}
+                data-price={
+                  paidPriceNum ? `$${paidPriceNum}` : 'Price on request'
+                }
+              >
+                <span class="ico">💬</span>
+                <div>
+                  <div style="font-weight:900;">Buy via WhatsApp</div>
+                  <div
+                    style="color:rgba(224,255,224,.78); font-size:.92rem;"
+                  >
+                    Fast reply • payment &amp; delivery
+                  </div>
+                </div>
+              </a>
+
+              <a
+                class="buyBtn"
+                href="https://www.facebook.com/houssem.kamas.2025"
+                target="_blank"
+                rel="noopener"
+              >
+                <span class="ico">ⓕ</span>
+                <div>
+                  <div style="font-weight:900;">Buy via Facebook</div>
+                  <div
+                    style="color:rgba(224,255,224,.78); font-size:.92rem;"
+                  >
+                    Message me directly
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="hint">
+              Paid item → code body is hidden by design. You can describe what
+              is included here (files, support, license…).
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    :root{
+      --green:#00ff88;
+      --black:#020502;
+
+      --panel: rgba(0, 255, 136, 0.05);
+      --panel2: rgba(0, 255, 136, 0.02);
+      --border: rgba(0, 255, 136, 0.22);
+      --glow: rgba(0, 255, 136, 0.55);
+
+      --txt:#e0ffe0;
+      --muted: rgba(0,255,136,.72);
+
+      --r-lg: 26px;
+      --r-md: 18px;
+      --r-sm: 12px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--txt);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      overflow-x:hidden;
+      background:
+        radial-gradient(900px 520px at 20% 15%, rgba(0,255,136,.10), transparent 60%),
+        radial-gradient(900px 520px at 80% 20%, rgba(0,255,136,.06), transparent 60%),
+        radial-gradient(1200px 900px at 50% 95%, rgba(255,255,255,.03), transparent 60%),
+        linear-gradient(180deg, #071108, var(--black) 65%);
+    }
+
+    canvas#matrix{
+      position:fixed; inset:0;
+      z-index:-6;
+      opacity:0.22;
+      pointer-events:none;
+    }
+    .scanline{
+      position:fixed; inset:0; z-index:-5; pointer-events:none;
+      background:
+        linear-gradient(to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.22) 50%,
+          rgba(0,0,0,0.22)
+        );
+      background-size: 100% 4px;
+      opacity: 0.18;
+    }
+    .vignette{
+      position:fixed; inset:0; z-index:-4; pointer-events:none;
+      background: radial-gradient(circle, transparent 60%, rgba(0,0,0,.85) 100%);
+    }
+
+    .grain{
+      position:fixed; inset:0; z-index:-3; pointer-events:none;
+      opacity:.12;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.50'/%3E%3C/svg%3E");
+      background-size: 260px 260px;
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      width:min(1160px, 92vw);
+      margin:0 auto;
+      padding: 28px 0 96px;
+      position:relative;
+      z-index:2;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 16px;
+      flex-wrap:wrap;
+    }
+
+    .crumbs{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      font-size:.94rem;
+      letter-spacing:.2px;
+      color: rgba(224,255,224,.92);
+    }
+    .crumbs a{
+      color: rgba(224,255,224,.92);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(0,255,136,.18);
+      padding-bottom: 2px;
+    }
+    .crumbs a:hover{ border-bottom-color: rgba(0,255,136,.55); }
+    .slash{ opacity:.55; }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(0,20,10,.55);
+      color: var(--green);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: all .18s ease;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    .btn:hover{
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 24px var(--glow), 0 10px 26px rgba(0,0,0,.25);
+      transform: translateY(-2px);
+    }
+
+    .hero{
+      position:relative;
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(0,255,136,.08), rgba(0,255,136,.03));
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      padding: 16px 16px 14px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.28);
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(circle at 65% 40%, rgba(0,255,136,.18), transparent 62%),
+        radial-gradient(circle at 50% 90%, rgba(0,255,136,.10), transparent 70%);
+      transform: rotate(10deg);
+      opacity:.70;
+      pointer-events:none;
+    }
+    .heroTop{
+      position:relative;
+      z-index:2;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .title{
+      margin:0;
+      font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+      font-weight: 900;
+      letter-spacing: -0.6px;
+      color: var(--txt);
+      text-shadow: 0 0 18px rgba(0,255,136,.14);
+    }
+    .subline{
+      margin: 7px 0 0 0;
+      color: rgba(224,255,224,.86);
+      line-height: 1.35;
+      max-width: 760px;
+      font-size: .96rem;
+    }
+    .pills{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,136,.22);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+      font-size: .86rem;
+      color: rgba(224,255,224,.94);
+      letter-spacing:.2px;
+    }
+    .pill .dot{
+      width:8px; height:8px; border-radius:50%;
+      background: rgba(0,255,136,.98);
+      box-shadow: 0 0 14px rgba(0,255,136,.60), 0 0 34px rgba(0,255,136,.18);
+    }
+    .pill.free .dot{
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 14px rgba(255,255,255,.30);
+    }
+
+    .layout{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: 22px;
+      border: 1px solid rgba(0,255,136,.20);
+      background: linear-gradient(180deg, rgba(0,255,136,.055), rgba(0,255,136,.02));
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+
+    .section{
+      padding: 14px 14px;
+      border-top: 1px solid rgba(0,255,136,.14);
+    }
+    .section:first-child{ border-top:none; }
+
+    .k{
+      margin: 0 0 10px 0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size:.78rem;
+      color: rgba(0,255,136,.80);
+    }
+    .k .spark{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(0,255,136,.98);
+      box-shadow: 0 0 16px rgba(0,255,136,.55);
+    }
+
+    .p{
+      margin:0;
+      color: rgba(224,255,224,.92);
+      line-height: 1.58;
+      font-size: .96rem;
+    }
+
+    .side{ position: sticky; top: 14px; }
+    @media (max-width: 980px){ .side{ position: static; } }
+
+    .gallery{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+    }
+    @media (max-width: 900px){ .gallery{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 560px){ .gallery{ grid-template-columns: 1fr;} }
+
+    .gItem{
+      border-radius: 16px;
+      overflow:hidden;
+      border:1px solid rgba(0,255,136,.18);
+      background: rgba(0,0,0,.25);
+      position:relative;
+      min-height: 168px;
+    }
+    .gItem img{
+      width:100%;
+      height: 180px;
+      object-fit: cover;
+      display:block;
+      filter: saturate(1.02);
+    }
+    .gItem video{
+      width:100%;
+      height: 220px;
+      display:block;
+      background:#000;
+    }
+    .mediaHint{
+      margin-top:10px;
+      color: rgba(224,255,224,.75);
+      font-size:.90rem;
+      line-height: 1.35;
+    }
+
+    .codeWrap{
+      border-radius: 18px;
+      border: 1px solid rgba(0,255,136,.22);
+      background: rgba(0,0,0,.28);
+      overflow:hidden;
+    }
+    .codeTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(0,255,136,.14);
+      background: rgba(0,0,0,.22);
+    }
+    .dots{ display:flex; gap:7px; align-items:center; }
+    .dotUI{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(255,255,255,.22);
+      box-shadow: 0 0 10px rgba(0,255,136,.10);
+    }
+    .dotUI.g{ background: rgba(0,255,136,.70); }
+    .dotUI.y{ background: rgba(255,255,255,.35); }
+    .dotUI.r{ background: rgba(0,255,136,.35); }
+    .fileTag{
+      font-size:.82rem;
+      color: rgba(224,255,224,.86);
+      opacity:.95;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+    pre.codeBox{
+      margin:0;
+      padding: 12px;
+      overflow:auto;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(224,255,224,.92);
+      text-shadow: 0 0 12px rgba(0,255,136,.08);
+      white-space: pre;
+    }
+
+    .buyRow{ display:flex; flex-direction:column; gap: 12px; }
+    .buyBtn{
+      border-radius: 16px;
+      padding: 14px 14px;
+      border: 1px solid rgba(0,255,136,.22);
+      background: rgba(0,0,0,.22);
+      text-decoration:none;
+      color: rgba(224,255,224,.96);
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      backdrop-filter: blur(10px);
+    }
+    .buyBtn:hover{
+      transform: translateY(-2px);
+      background: rgba(0,255,136,.06);
+      border-color: rgba(0,255,136,.35);
+      box-shadow: 0 0 34px rgba(0,255,136,.14);
+    }
+    .ico{
+      width: 40px; height: 40px; border-radius: 14px;
+      display:grid; place-items:center;
+      border: 1px solid rgba(0,255,136,.22);
+      background: rgba(0,0,0,.20);
+      box-shadow: 0 0 20px rgba(0,255,136,.10);
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+    .hint{
+      margin-top: 10px;
+      color: rgba(224,255,224,.78);
+      font-size: .90rem;
+      line-height: 1.35;
+    }
+
+    .panel{ display:none; }
+    .panel.active{ display:block; }
+  </style>
+
+  <script>
+    // FREE/PAID SWITCH (hash)
+    function renderPanel(){
+      const h = (location.hash || "#free").toLowerCase();
+      const free = document.getElementById("freePanel");
+      const paid = document.getElementById("paidPanel");
+      free.classList.remove("active");
+      paid.classList.remove("active");
+
+      const isPaid = (h === "#paid");
+      (isPaid ? paid : free).classList.add("active");
+
+      const crumb = document.getElementById("crumbName");
+      if (crumb){
+        const freeName = crumb.dataset.free || "Free code";
+        const paidName = crumb.dataset.paid || "Paid code";
+        crumb.textContent = isPaid ? paidName : freeName;
+      }
+    }
+    window.addEventListener("hashchange", renderPanel);
+    renderPanel();
+
+    // WhatsApp link builder (paid)
+    const phone = "213781302576";
+    function buildWhatsApp(title, price, type){
+      const msg = \`DOMIX Inquiry - \${type} - \${title} - \${price}\`;
+      return \`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`;
+    }
+    const waBtn = document.getElementById("waBtn");
+    if (waBtn){
+      const t = waBtn.dataset.title || "Code";
+      const p = waBtn.dataset.price || "Price";
+      waBtn.href = buildWhatsApp(t, p, "Code");
+    }
+
+    // MATRIX RAIN
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
+
+    const chars = '01<>[]{}+-=/*_()$#@!CODE';
+    const charArray = chars.split('');
+    const fontSize = 14;
+    let columns = Math.floor(W / fontSize);
+    let drops = new Array(columns).fill(1);
+
+    function resize(){
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      columns = Math.floor(W / fontSize);
+      drops = new Array(columns).fill(1);
+    }
+    window.addEventListener('resize', resize);
+
+    function drawMatrix(){
+      ctx.fillStyle = 'rgba(2, 5, 2, 0.06)';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.font = fontSize + 'px monospace';
+      for(let i=0; i<drops.length; i++){
+        const text = charArray[Math.floor(Math.random()*charArray.length)];
+        const y = drops[i] * fontSize;
+
+        ctx.fillStyle = 'rgba(0,255,136,0.85)';
+        ctx.shadowColor = 'rgba(0,255,136,0.35)';
+        ctx.shadowBlur = 8;
+        ctx.fillText(text, i * fontSize, y);
+
+        if(y > H && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      ctx.shadowBlur = 0;
+    }
+    setInterval(drawMatrix, 35);
+  </script>
+</Layout>

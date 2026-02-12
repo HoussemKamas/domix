@@ -1,0 +1,509 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type DomainItem = {
+  id?: number | string;
+  domain?: string;
+  name?: string;
+  price?: string | number;
+  niche?: string;
+  category?: string;
+  status?: string;
+  image?: string;
+  logo?: string;
+  notes?: string;
+};
+
+type DomixData = {
+  domains: DomainItem[];
+  prompts?: any[];
+  code?: any[];
+  extensions?: any[];
+};
+
+let data: DomixData = { domains: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// لا نختار دومين معيّن هنا، التحديد سيتم في المتصفح عبر الـ hash
+const allDomains = [...(data.domains ?? [])];
+---
+
+<Layout title="DOMIX — Domain Details">
+  <!-- Animated Background -->
+  <div class="bg-anim">
+    <div class="aurora"></div>
+    <canvas id="particles"></canvas>
+  </div>
+
+  <!-- نمرّر قائمة الدومينات للجافاسكربت عبر data-* -->
+  <main
+    class="wrap"
+    data-domains={JSON.stringify(
+      allDomains.map((d) => ({
+        id: d.id ?? '',
+        domain: d.domain ?? d.name ?? 'Domain.com',
+        price: d.price ?? '',
+        niche: d.niche ?? d.category ?? '',
+        status: d.status ?? '',
+        image: d.image ?? d.logo ?? '',
+        notes: d.notes ?? ''
+      }))
+    )}
+  >
+    <!-- Navigation -->
+    <nav class="top-nav">
+      <a href="/domains" class="back-btn">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Domains
+      </a>
+      <div class="nav-actions">
+        <div class="action-icon" title="Share">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"
+            ></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <div class="action-icon" title="Add to Watchlist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <div class="details-grid">
+      <!-- Left Column -->
+      <div class="main-col">
+        <!-- Hero Section -->
+        <article class="hero-card">
+          <div class="domain-visual" id="domainVisual">
+            <div class="domain-text-lg" id="visualText">LOGO</div>
+          </div>
+
+          <div class="info-header">
+            <h1 id="detailName">Domain.com</h1>
+          </div>
+        </article>
+
+        <!-- Description Section -->
+        <section class="section-card">
+          <div class="sec-title">About this Domain</div>
+          <p class="desc-text" id="detailDescription">
+            This premium domain name is short, memorable, and perfect for
+            branding. It carries strong authority in its niche and has a history
+            of steady traffic. Ideal for startups looking to establish instant
+            credibility or established businesses aiming to upgrade their online
+            presence.
+            <br />
+            <br />
+            Ownership transfer is secure and fast. The domain is registered at a
+            major registrar and can be pushed to your account within minutes of
+            purchase.
+          </p>
+        </section>
+      </div>
+
+      <!-- Right Column (Sidebar) -->
+      <aside class="side-col">
+        <div class="purchase-card">
+          <div class="price-block">
+            <div class="price-label">Buy It Now Price</div>
+            <div class="price-val" id="detailPrice">$0,000</div>
+            <div class="price-sub">VAT included if applicable</div>
+          </div>
+
+          <a
+            href="#"
+            class="btn-buy"
+            id="btnBuy"
+            target="_blank"
+            rel="noopener"
+          >
+            Buy Now
+          </a>
+          <button class="btn-offer" id="btnOffer">
+            Make an Offer
+          </button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <style>
+    :root{
+      --bg0:#101b3a;
+      --bg1:#141f4a;
+      --bg2:#0b122b;
+
+      --card-bg: rgba(255,255,255,.06);
+      --card-border: rgba(255,255,255,.12);
+
+      --ink:#ffffff;
+      --muted: rgba(255,255,255,.72);
+      --accent: #2aa9ff;
+
+      --radius: 20px;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(120,120,255,.14), transparent 60%),
+                  radial-gradient(900px 600px at 80% 30%, rgba(0,220,255,.10), transparent 60%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+      color: var(--ink);
+      overflow-x:hidden;
+    }
+
+    .bg-anim{
+      position:fixed; inset:0; z-index:-5; pointer-events:none; overflow:hidden;
+    }
+    .aurora{
+      position:absolute; inset:-20%;
+      filter: blur(30px); opacity:.9; mix-blend-mode: screen;
+      animation: auroraMove 16s ease-in-out infinite;
+      background:
+        radial-gradient(600px 400px at 20% 30%, rgba(120,100,255,.22), transparent 60%),
+        radial-gradient(520px 420px at 75% 35%, rgba(0,210,255,.18), transparent 62%),
+        radial-gradient(700px 480px at 55% 80%, rgba(255,120,200,.10), transparent 65%);
+    }
+    @keyframes auroraMove{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(0,-18px,0) scale(1.03); }
+    }
+    canvas#particles{
+      position:absolute; inset:0; width:100%; height:100%; opacity: 1;
+    }
+
+    .wrap{
+      width:min(1200px, 92vw);
+      margin: 0 auto;
+      padding: 40px 0 120px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-nav{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom: 30px;
+    }
+    .back-btn{
+      text-decoration:none; color: var(--muted); font-weight:600;
+      display:inline-flex; align-items:center; gap:8px;
+      transition: color .2s;
+    }
+    .back-btn:hover{ color: #fff; }
+
+    .nav-actions{ display:flex; gap:12px; }
+    .action-icon{
+      width:40px; height:40px; border-radius:12px;
+      background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition: all .2s; color:#fff;
+    }
+    .action-icon:hover{ background: rgba(255,255,255,.15); transform:translateY(-2px); }
+    .action-icon svg{ width:20px; height:20px; stroke-width:2; }
+
+    .details-grid{
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 30px;
+      align-items: start;
+    }
+    @media (max-width: 900px){ .details-grid{ grid-template-columns: 1fr; } }
+
+    .main-col{ display:flex; flex-direction:column; gap:24px; }
+
+    .hero-card{
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 30px;
+      backdrop-filter: blur(12px); box-shadow: var(--shadow);
+      position:relative; overflow:hidden;
+    }
+    .domain-visual{
+      height: 280px;
+      background: rgba(0,0,0,.2);
+      border-radius: 16px;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom: 0;
+      position:relative;
+    }
+    .domain-logo-lg{
+      max-width: 70%; max-height: 80%;
+      object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,.4));
+    }
+    .domain-text-lg{
+      font-size: 3.5rem; font-weight: 900; letter-spacing: 2px;
+      text-align: center; color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .info-header{
+      margin-top: 24px;
+      text-align: left;
+    }
+    .info-header h1{
+      margin: 0; font-size: 2.2rem; font-weight: 800; color:#fff;
+    }
+
+    .section-card{
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+    .sec-title{
+      font-size: 1.1rem; font-weight: 700; color:#fff; margin: 0 0 16px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .sec-title::before{
+      content:""; width:4px; height:18px; background: var(--accent); border-radius:2px;
+    }
+    .desc-text{
+      line-height: 1.7; color: rgba(255,255,255,.85); font-size: 1.05rem;
+    }
+
+    .side-col{ position:sticky; top: 30px; }
+    @media (max-width: 900px){ .side-col{ position: static; } }
+
+    .purchase-card{
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 24px;
+      backdrop-filter: blur(16px); box-shadow: var(--shadow);
+      display:flex; flex-direction:column; gap:20px;
+    }
+
+    .price-block{ text-align:center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .price-label{ font-size: 0.9rem; color: var(--muted); margin-bottom: 6px; }
+    .price-val{ font-size: 2.2rem; font-weight: 900; color:#fff; letter-spacing:-0.5px; }
+    .price-sub{ font-size: 0.85rem; color: rgba(255,255,255,.5); margin-top:4px; }
+
+    .btn-buy{
+      background: linear-gradient(135deg, #2aa9ff 0%, #0077ff 100%);
+      color: white; border:none; padding: 16px; border-radius: 14px;
+      font-size: 1.1rem; font-weight: 700; cursor:pointer;
+      box-shadow: 0 10px 25px rgba(42,169,255,.3);
+      transition: transform .2s, box-shadow .2s;
+      text-align:center; text-decoration:none; display:block;
+    }
+    .btn-buy:hover{ transform: translateY(-2px); box-shadow: 0 16px 35px rgba(42,169,255,.45); }
+
+    .btn-offer{
+      background: rgba(255,255,255,.08); color: white; border: 1px solid rgba(255,255,255,.2);
+      padding: 14px; border-radius: 14px; font-weight: 600; cursor:pointer;
+      transition: background .2s; width:100%;
+    }
+    .btn-offer:hover{ background: rgba(255,255,255,.15); }
+  </style>
+
+  <script>
+    // ====== 1. تحميل البيانات من domix.json (ممررة في data-domains) ======
+    function parseDomains(){
+      const wrap = document.querySelector('.wrap');
+      if(!wrap) return [];
+      try{
+        const raw = wrap.getAttribute('data-domains') || '[]';
+        return JSON.parse(raw);
+      }catch(e){
+        console.error('Failed to parse domains data', e);
+        return [];
+      }
+    }
+
+    function getDomainFromHash(domains){
+      const hash = window.location.hash.replace('#','').trim();
+      if(!hash) return domains[0] || null;
+
+      // جرّب المطابقة كـ id رقمي أو نصّي
+      const byId = domains.find(d => String(d.id) === hash);
+      if(byId) return byId;
+
+      // أو مطابقة على الاسم/الدومين (مثلاً domain.com في الهاش)
+      const lower = hash.toLowerCase();
+      const byName = domains.find(
+        d =>
+          (d.domain && d.domain.toLowerCase() === lower) ||
+          (d.name && d.name.toLowerCase() === lower)
+      );
+      return byName || domains[0] || null;
+    }
+
+    function formatPrice(p){
+      if(!p && p !== 0) return 'Make Offer';
+      if(typeof p === 'number'){
+        return '$' + p.toLocaleString();
+      }
+      return String(p);
+    }
+
+    // بناء روابط واتساب/العرض
+    const phone = "213781302576";
+    function buildWhatsApp(title, price){
+      const msg = \`DOMIX Domain Inquiry - \${title} - \${price}\`;
+      return \`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`;
+    }
+
+    function updateDomainDetails(){
+      const domains = parseDomains();
+      if(!domains.length) return;
+
+      const item = getDomainFromHash(domains);
+      if(!item) return;
+
+      const label = item.domain || item.name || 'Domain.com';
+      const priceLabel = formatPrice(item.price);
+      const niche = item.niche || item.category || '';
+      const status = item.status || '';
+      const notes = item.notes || '';
+      const image = item.image || '';
+
+      document.title = label + " — Details";
+
+      const nameEl = document.getElementById('detailName');
+      const priceEl = document.getElementById('detailPrice');
+      const descEl = document.getElementById('detailDescription');
+      const visualContainer = document.getElementById('domainVisual');
+
+      if(nameEl) nameEl.textContent = label;
+      if(priceEl) priceEl.textContent = priceLabel;
+
+      if(descEl && (niche || status || notes)){
+        let extra = "";
+        if(niche) extra += \`Niche: \${niche}. \`;
+        if(status) extra += \`Status: \${status}. \`;
+        if(notes) extra += "\\n\\n" + notes;
+        descEl.textContent = extra;
+      }
+
+      if(visualContainer){
+        if(image){
+          visualContainer.innerHTML =
+            '<img src="' + image +
+            '" class="domain-logo-lg" alt="' + label + ' logo" />';
+        } else {
+          visualContainer.innerHTML =
+            '<div class="domain-text-lg">' + label + '</div>';
+        }
+      }
+
+      const buyBtn = document.getElementById('btnBuy');
+      const offerBtn = document.getElementById('btnOffer');
+      const waLink = buildWhatsApp(label, priceLabel);
+
+      if(buyBtn){
+        buyBtn.href = waLink;
+        buyBtn.onclick = null;
+      }
+      if(offerBtn){
+        offerBtn.onclick = function(){
+          window.open(waLink, '_blank');
+        };
+      }
+    }
+
+    window.addEventListener('load', updateDomainDetails);
+    window.addEventListener('hashchange', updateDomainDetails);
+
+    // ====== 2. خلفية الجزيئات (Particles) ======
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d", { alpha: true });
+
+    function fitCanvas(){
+      const dpr = window.devicePixelRatio || 1;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    const particles = [];
+    function initParticles(){
+      particles.length = 0;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const count = Math.floor(w * h / 15000);
+      for(let i=0; i<count; i++){
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: Math.random() * 2 + 0.5,
+          alpha: Math.random() * 0.5 + 0.1
+        });
+      }
+    }
+
+    function animateParticles(){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if(p.x < 0) p.x = w;
+        if(p.x > w) p.x = 0;
+        if(p.y < 0) p.y = h;
+        if(p.y > h) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = \`rgba(255, 255, 255, \${p.alpha})\`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    fitCanvas();
+    initParticles();
+    animateParticles();
+
+    window.addEventListener('resize', () => {
+      fitCanvas();
+      initParticles();
+    });
+  </script>
+</Layout>

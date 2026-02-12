@@ -1,0 +1,441 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json مثل index.astro
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type DomainItem = {
+  id?: number | string;
+  domain?: string;
+  name?: string;
+  price?: string;
+  category?: string;
+  status?: string;
+  logo?: string;
+  notes?: string;
+};
+
+type DomixData = {
+  domains: DomainItem[];
+  prompts?: any[];
+  code?: any[];
+  extensions?: any[];
+};
+
+let data: DomixData = { domains: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// ترتيب الدومينات من الأجدد إلى الأقدم حسب id
+const byIdDesc = (a: DomainItem, b: DomainItem) =>
+  Number(b.id ?? 0) - Number(a.id ?? 0);
+
+const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
+---
+
+<Layout title="DOMIX — Domains">
+  <main class="wrap">
+    <div class="bg" aria-hidden="true">
+      <div class="aurora"></div>
+      <canvas id="particles"></canvas>
+    </div>
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="h1">Domains</div>
+      </div>
+
+      <div class="actions">
+        <!-- عدّل الروابط حسب الراوت عندك إذا أحببت -->
+        <a class="btn" href="/">← Back</a>
+        <a class="btn" href="/admin">Admin</a>
+      </div>
+    </div>
+
+    <!-- شبكة الكروت: تُبنى من allDomains -->
+    {allDomains.length === 0 ? (
+      <p style="color:#fff; margin-top:24px;">لا توجد دومينات بعد، أضف من لوحة الأدمن.</p>
+    ) : (
+      <section class="grid">
+        {allDomains.map((item) => {
+          const label = item.domain ?? item.name ?? 'Untitled domain';
+          const price = item.price ?? '';
+          const logo = item.logo ?? '';
+
+          const hasLogo = logo.trim().length > 0;
+
+          return (
+            <article class="card" id={`domain-${item.id}`}>
+              <div class="card-top">
+                <button class="fav" type="button" aria-label="Favorite">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(12,18,36,.65)" stroke-width="2">
+                    <path d="M20.8 4.7c-1.6-1.6-4.2-1.6-5.8 0L12 7.7 9 4.7c-1.6-1.6-4.2-1.6-5.8 0s-1.6 4.2 0 5.8l2.9 2.9L12 19.3l5.9-5.9 2.9-2.9c1.6-1.6 1.6-4.2 0-5.8z" />
+                  </svg>
+                </button>
+
+                {hasLogo ? (
+                  <img
+                    class="logo"
+                    src={logo}
+                    alt={`${label} logo`}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="logo-fallback">LOGO</div>
+                )}
+              </div>
+
+              <a
+                href={`/domains-details#${item.id ?? ''}`}
+                style="text-decoration:none; color:inherit;"
+              >
+                <div class="card-bottom">
+                  <div class="domain" title={label}>{label}</div>
+                  {price && <div class="price">{price}</div>}
+                </div>
+              </a>
+            </article>
+          );
+        })}
+      </section>
+    )}
+  </main>
+
+  <style>
+    :root{
+      --bg0:#101b3a;
+      --bg1:#141f4a;
+      --bg2:#0b122b;
+
+      --card:#ffffff;
+      --cardBorder: rgba(255,255,255,.16);
+      --ink:#0c1224;
+      --muted: rgba(12,18,36,.72);
+
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 20px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(120,120,255,.14), transparent 60%),
+                  radial-gradient(900px 600px at 80% 30%, rgba(0,220,255,.10), transparent 60%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+      color:#fff;
+      overflow-x:hidden;
+    }
+
+    .bg{
+      position:fixed; inset:0;
+      z-index:-5;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .aurora{
+      position:absolute; inset:-20%;
+      filter: blur(30px);
+      opacity:.9;
+      mix-blend-mode: screen;
+      animation: auroraMove 16s.ease-in-out infinite;
+      background:
+        radial-gradient(600px 400px at 20% 30%, rgba(120,100,255,.22), transparent 60%),
+        radial-gradient(520px 420px at 75% 35%, rgba(0,210,255,.18), transparent 62%),
+        radial-gradient(700px 480px at 55% 80%, rgba(255,120,200,.10), transparent 65%);
+    }
+    @keyframes auroraMove{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(0,-18px,0) scale(1.03); }
+    }
+
+    canvas#particles{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      opacity: 1;
+    }
+
+    .wrap{
+      width:min(1220px, 92vw);
+      margin: 0 auto;
+      padding: 44px 0 110px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom: 20px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-width: 760px;
+    }
+    .h1{
+      font-weight: 950;
+      letter-spacing: .2px;
+      font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+      color: #ffffff;
+      text-shadow: 0 16px 40px rgba(0,0,0,.35);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+    }
+    .btn{
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      border-radius: 14px;
+      padding: 10px 13px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.25);
+      transition: transform .18s.ease, box-shadow .18s.ease, border-color .18s.ease;
+      user-select:none;
+      cursor:pointer;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.35);
+      box-shadow: 0 20px 52px rgba(0,0,0,.32);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 760px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      position:relative;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 0;
+      overflow:hidden;
+      box-shadow: 0 18px 55px rgba(0,0,0,.28);
+      transition: transform .18s.ease, box-shadow .18s.ease, border-color .18s.ease;
+    }
+    .card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 26px 70px rgba(0,0,0,.34);
+      border-color: rgba(255,255,255,.20);
+    }
+
+    .card-top{
+      position:relative;
+      border-radius: calc(var(--radius) - 2px);
+      background: var(--card);
+      color: var(--ink);
+      margin: 12px;
+      overflow:hidden;
+      box-shadow: 0 8px 22px rgba(0,0,0,.10);
+      aspect-ratio: 16 / 9;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .logo{
+      width: min(78%, 220px);
+      height: min(70%, 110px);
+      object-fit: contain;
+      display:block;
+    }
+    .logo-fallback{
+      font-weight: 950;
+      letter-spacing: .8px;
+      color: rgba(12,18,36,.45);
+      user-select:none;
+    }
+
+    .fav{
+      position:absolute;
+      top: 10px;
+      left: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(12,18,36,.10);
+      background: rgba(255,255,255,.92);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .15s.ease, background .15s.ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    }
+    .fav:hover{ transform: translateY(-1px); }
+    .fav svg{ width: 18px; height: 18px; opacity:.55; }
+    .fav.is-on svg{ opacity:1; fill:#ff3b6b; stroke:#ff3b6b; }
+
+    .card-bottom{
+      padding: 2px 14px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .domain{
+      direction:ltr;
+      text-align:left;
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.92);
+      font-size: 1.08rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .price{
+      direction:ltr;
+      text-align:left;
+      font-weight: 850;
+      color: rgba(255,255,255,.78);
+      font-size: 1.0rem;
+      white-space: nowrap;
+    }
+  </style>
+
+  <script>
+    // تفعيل/إلغاء الـ Favorite على القلوب
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fav').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          btn.classList.toggle('is-on');
+        });
+      });
+    });
+
+    // خلفية الـ particles (نفس كودك القديم تقريباً)
+    const canvas = document.getElementById("particles");
+    if (canvas) {
+      const ctx = canvas.getContext("2d", { alpha: true });
+
+      function fit(){
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        canvas._dpr = dpr;
+        canvas.width  = Math.floor(innerWidth * dpr);
+        canvas.height = Math.floor(innerHeight * dpr);
+        canvas.style.width = innerWidth + "px";
+        canvas.style.height = innerHeight + "px";
+      }
+
+      const dots = [];
+      function seed(){
+        dots.length = 0;
+        const dpr = canvas._dpr || 1;
+        const w = canvas.width, h = canvas.height;
+
+        const count = Math.floor((w*h) / (dpr*dpr) / 12000);
+        for(let i=0;i<count;i++){
+          dots.push({
+            x: Math.random()*w,
+            y: Math.random()*h,
+            r: (Math.random()*1.6 + 0.4) * dpr,
+            a: Math.random()*0.45 + 0.15,
+            tw: Math.random()*0.020 + 0.006,
+            ph: Math.random()*Math.PI*2,
+            vx: (Math.random()*0.18 + 0.04) * dpr,
+            vy: (Math.random()*0.10 - 0.05) * dpr
+          });
+        }
+      }
+
+      let raf;
+      function draw(){
+        const w = canvas.width, h = canvas.height;
+        const dpr = canvas._dpr || 1;
+
+        ctx.clearRect(0,0,w,h);
+
+        for(const p of dots){
+          p.ph += p.tw;
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if(p.x > w + 40*dpr) p.x = -40*dpr;
+          if(p.x < -40*dpr) p.x = w + 40*dpr;
+          if(p.y > h + 40*dpr) p.y = -40*dpr;
+          if(p.y < -40*dpr) p.y = h + 40*dpr;
+
+          const alpha = p.a + Math.sin(p.ph)*0.18;
+
+          ctx.beginPath();
+          ctx.fillStyle = \`rgba(255,255,255,\${Math.max(0, Math.min(0.85, alpha))})\`;
+          ctx.shadowBlur = 18 * dpr;
+          ctx.shadowColor = "rgba(255,255,255,0.30)";
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 1 * dpr;
+        for(let i=0;i<dots.length;i+=4){
+          const a = dots[i];
+          const b = dots[(i+7) % dots.length];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.hypot(dx,dy);
+          if(dist < 180 * dpr){
+            const k = 1 - (dist / (180 * dpr));
+            ctx.strokeStyle = \`rgba(255,255,255,\${0.06 * k})\`;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+
+        raf = requestAnimationFrame(draw);
+      }
+
+      fit();
+      seed();
+      draw();
+
+      let timer;
+      addEventListener("resize", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          cancelAnimationFrame(raf);
+          fit();
+          seed();
+          draw();
+        }, 120);
+      });
+    }
+  </script>
+</Layout>

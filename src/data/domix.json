@@ -1,0 +1,60 @@
+{
+  "domains": [
+    {
+      "id": "1",
+      "domain": "example.com",
+      "name": "example.com",
+      "price": 500,
+      "niche": "Tech",
+      "status": "Available",
+      "description": "Short, memorable domain in the tech niche.",
+      "logo": "/images/domain-placeholder.jpg",
+      "image": "/images/domain-placeholder.jpg"
+    }
+  ],
+
+  "prompts": [
+    {
+      "id": "1",
+      "title": "Neon City Portrait",
+      "type": "Midjourney",
+      "price": 5,
+      "is_free": false,
+      "description": "A high quality prompt for cyberpunk style.",
+      "prompt_text": "",
+      "image": "/images/prompt-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    }
+  ],
+
+  "code": [
+    {
+      "id": "1",
+      "title": "Python Email Scraper",
+      "language": "Python",
+      "price": 20,
+      "is_free": false,
+      "description": "Automated script to extract emails.",
+      "code_content": "",
+      "image": "/images/code-placeholder.jpg",
+      "gallery": [],
+      "video": ""
+    }
+  ],
+
+  "extensions": [
+    {
+      "id": "ext_1",
+      "title": "Focus Guard",
+      "name": "Focus Guard",
+      "category": "Productivity",
+      "price": 0,
+      "is_free": true,
+      "description": "Focus Guard keeps you in deep work mode by blocking distracting sites on a custom schedule, so you can focus on sourcing domains, contacting leads, and closing deals without noise.",
+      "logo": "/uploads/focus-guard-cover.png",
+      "video": "/uploads/focus-guard-demo.mp4",
+      "download_url": "/uploads/focus-guard.zip"
+    }
+  ]
+}

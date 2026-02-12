@@ -1,0 +1,491 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// قراءة domix.json
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+
+type CodeItem = {
+  id?: number | string;
+  title?: string;
+  language?: string;
+  price?: number | string;
+  description?: string;
+  image?: string;
+};
+
+type DomixData = {
+  domains?: any[];
+  prompts?: any[];
+  code: CodeItem[];
+  extensions?: any[];
+};
+
+let data: DomixData = { code: [] };
+
+try {
+  const raw = fs.readFileSync(dataPath, 'utf-8');
+  const parsed = JSON.parse(raw);
+
+  data = {
+    domains: parsed.domains ?? [],
+    prompts: parsed.prompts ?? [],
+    code: parsed.code ?? [],
+    extensions: parsed.extensions ?? []
+  };
+} catch (e) {
+  console.error('Failed to read domix.json', e);
+}
+
+// ترتيب السكربتات من الأحدث للأقدم حسب id
+const byIdDesc = (a: CodeItem, b: CodeItem) =>
+  Number(b.id ?? 0) - Number(a.id ?? 0);
+
+const allCode = [...(data.code ?? [])].sort(byIdDesc);
+---
+
+<Layout title="DOMIX — Code Repository">
+  <!-- الخلفية: Matrix Rain + طبقات -->
+  <canvas id="matrix"></canvas>
+  <div class="scanline"></div>
+  <div class="vignette"></div>
+
+  <main class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="h1">&lt;CODE /&gt;</div>
+        <div class="sub">Snippet Repository // System.Ready</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/">← TERMINAL</a>
+      </div>
+    </div>
+
+    {allCode.length === 0 ? (
+      <p style="margin-top:20px; color:rgba(0,255,136,0.7); font-size:.95rem;">
+        لا توجد سكربتات بعد، أضِف بعض الأكواد من لوحة الأدمن.
+      </p>
+    ) : (
+      <section class="grid">
+        {allCode.map((item) => {
+          const title = item.title ?? 'Untitled snippet';
+          const lang = item.language ?? 'Code';
+          const priceNum = Number(item.price ?? 0);
+          const isFree = !priceNum || priceNum === 0;
+          const priceLabel = isFree ? 'FREE' : `$${priceNum}`;
+
+          // النص داخل صندوق اللوغو (اختصار اللغة أو رمز)
+          const logoText =
+            lang.length <= 4 ? lang : lang.slice(0, 3);
+
+          return (
+            <a
+              class="card"
+              href={`/code-details#${item.id ?? ''}`}
+            >
+              <div class="logoBox">
+                {logoText}
+              </div>
+
+              <div class="meta">
+                <div>
+                  <div class="title">{title}</div>
+                  <div class="lang">{lang}</div>
+                </div>
+                <div class="price">{priceLabel}</div>
+              </div>
+
+              <div class="tags">
+                <span class="tag">Snippet</span>
+                <span class="tag">
+                  {isFree ? 'Free' : 'Paid'}
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </section>
+    )}
+  </main>
+
+  <!-- الروبوت (Code Bot) في الأسفل يمين -->
+  <div class="bot-dock">
+    <div class="robot-container">
+      <div class="holo-screen">
+        <div class="typing-code" id="codeText"></div>
+      </div>
+      <div class="robot-head">
+        <div class="robot-eye eye-left"></div>
+        <div class="robot-eye eye-right"></div>
+      </div>
+      <div class="robot-body"></div>
+    </div>
+  </div>
+
+  <style>
+    :root{
+      --green:#00ff88;
+      --dark-green:#003311;
+      --black:#020502;
+
+      --panel: rgba(0, 255, 136, 0.03);
+      --panel2: rgba(0, 255, 136, 0.06);
+      --border: rgba(0, 255, 136, 0.2);
+      --glow: rgba(0, 255, 136, 0.5);
+
+      --radius: 22px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:#e0ffe0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      overflow-x:hidden;
+      background-color: var(--black);
+      background: radial-gradient(circle at 50% 30%, #0a1f0a, #020502 80%);
+    }
+
+    canvas#matrix{
+      position:fixed; inset:0;
+      z-index:-5; opacity:0.25;
+      pointer-events:none;
+    }
+
+    .scanline{
+      position:fixed; inset:0; z-index:-4; pointer-events:none;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+      );
+      background-size: 100% 4px;
+      opacity: 0.15;
+    }
+
+    .vignette{
+      position:fixed; inset:0; z-index:-3; pointer-events:none;
+      background: radial-gradient(circle, transparent 60%, #000 100%);
+    }
+
+    .wrap{
+      width:min(1180px, 92vw);
+      margin:0 auto;
+      padding: 42px 0 140px;
+      position:relative;
+      z-index:2;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .brand{ display:flex; flex-direction:column; gap:4px; }
+    .h1{
+      font-size: clamp(2rem, 3.4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--green);
+      text-shadow: 0 0 15px var(--glow);
+    }
+    .sub{
+      color: rgba(0,255,136,0.7);
+      font-size: .95rem;
+    }
+
+    .actions{ display:flex; gap:10px; }
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(0,20,10,.6);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: all .2s.ease;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn:hover{
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:20px;
+      margin-top:20px;
+    }
+    @media (max-width: 1000px){ .grid{ grid-template-columns: repeat(3, 1fr);} }
+    @media (max-width: 740px){ .grid{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 520px){ .grid{ grid-template-columns: 1fr;} }
+
+    .card{
+      position:relative;
+      border-radius: 12px;
+      background: rgba(0, 20, 10, 0.6);
+      border:1px solid var(--border);
+      overflow:hidden;
+      padding:16px;
+      min-height: 240px;
+      cursor:pointer;
+      text-decoration:none;
+      color:#fff;
+      backdrop-filter: blur(4px);
+      transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card::before{
+      content:"";
+      position:absolute; top:0; left:0; width:100%; height:2px;
+      background: var(--green);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .3s.ease;
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    .card:hover{
+      transform: translateY(-5px);
+      border-color: var(--green);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
+    }
+    .card:hover::before{ transform: scaleX(1); }
+
+    .logoBox{
+      height: 100px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.3);
+      border:1px dashed var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 2rem;
+      color: var(--green);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover .logoBox {
+      border-style: solid;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .meta{
+      margin-top:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+    }
+    .title{
+      font-weight:700;
+      font-size:1.1rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .lang{
+      font-size: 0.8rem;
+      color: var(--green);
+      opacity: 0.8;
+    }
+    .price{
+      font-weight:700;
+      color: #000;
+      background: var(--border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .tags{
+      display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;
+    }
+    .tag{
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .bot-dock{
+      position: fixed;
+      right: 30px;
+      bottom: 20px;
+      z-index: 10;
+      pointer-events:none;
+    }
+    @media (max-width: 520px){
+      .bot-dock{
+        right: 10px;
+        bottom: 10px;
+        transform: scale(0.8);
+        transform-origin: bottom right;
+      }
+    }
+
+    .robot-container{
+      position: relative;
+      width: 140px;
+      height: 140px;
+    }
+
+    .robot-head{
+      position: absolute;
+      top: 30px; left: 40px;
+      width: 60px; height: 50px;
+      background: #020502;
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      box-shadow: 0 0 15px var(--glow);
+      z-index: 2;
+      animation: bob 3s.ease-in-out infinite;
+    }
+    .robot-eye{
+      position: absolute;
+      top: 15px;
+      width: 12px; height: 12px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 4s.infinite;
+    }
+    .eye-left{ left: 12px; }
+    .eye-right{ right: 12px; }
+
+    .robot-body{
+      position: absolute;
+      top: 85px; left: 50px;
+      width: 40px; height: 30px;
+      background: #0a1f0a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      z-index: 1;
+    }
+
+    .holo-screen{
+      position: absolute;
+      bottom: 80px; right: 70px;
+      width: 100px; height: 70px;
+      background: linear-gradient(135deg, rgba(0,255,136,0.1), transparent);
+      border-left: 1px solid var(--green);
+      transform: perspective(300px) rotateY(-20deg);
+      opacity: 0.8;
+      pointer-events: none;
+      padding: 8px;
+      font-size: 6px;
+      line-height: 1.2;
+      color: var(--green);
+      text-shadow: 0 0 2px var(--green);
+      overflow: hidden;
+    }
+    .typing-code{
+      white-space: pre-wrap;
+    }
+
+    @keyframes bob { 0%,100%{transform: translateY(0);} 50%{transform: translateY(-5px);} }
+    @keyframes blink { 0%,48%,52%,100%{transform: scaleY(1);} 50%{transform: scaleY(0.1);} }
+  </style>
+
+  <script>
+    // MATRIX RAIN EFFECT
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const chars = '01XYZ<>[]{}+-=*&^%$#@!CODE';
+    const charArray = chars.split('');
+    const fontSize = 14;
+    let columns = width / fontSize;
+
+    const drops = [];
+    for(let i=0; i<columns; i++){
+      drops[i] = 1;
+    }
+
+    function drawMatrix(){
+      ctx.fillStyle = 'rgba(2, 5, 2, 0.05)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+
+      for(let i=0; i<drops.length; i++){
+        const text = charArray[Math.floor(Math.random()*charArray.length)];
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+
+        if(drops[i]*fontSize > height && Math.random() > 0.975){
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 35);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = width / fontSize;
+    });
+
+    // ROBOT TYPING EFFECT
+    const codeSnippets = [
+      "function init() { return true; }",
+      "import pandas as pd",
+      "console.log('Hello World');",
+      "while(alive) { code(); }",
+      "git push origin main",
+      "sudo apt-get install freedom"
+    ];
+
+    const codeEl = document.getElementById('codeText');
+    let snipIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+
+    function typeCode(){
+      const currentSnip = codeSnippets[snipIdx];
+
+      if(isDeleting){
+        codeEl.textContent = currentSnip.substring(0, charIdx - 1);
+        charIdx--;
+      } else {
+        codeEl.textContent = currentSnip.substring(0, charIdx + 1);
+        charIdx++;
+      }
+
+      let speed = 100;
+
+      if(!isDeleting && charIdx === currentSnip.length){
+        speed = 2000;
+        isDeleting = true;
+      } else if(isDeleting && charIdx === 0){
+        isDeleting = false;
+        snipIdx = (snipIdx + 1) % codeSnippets.length;
+        speed = 500;
+      } else if(isDeleting){
+        speed = 50;
+      }
+
+      setTimeout(typeCode, speed);
+    }
+
+    typeCode();
+  </script>
+</Layout>

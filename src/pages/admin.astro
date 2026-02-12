@@ -1,0 +1,484 @@
+---
+import Layout from '../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// ==== Paths ====
+const dataPath = path.join(process.cwd(), 'src/data/domix.json');
+const uploadDir = path.join(process.cwd(), 'public/uploads');
+
+// Ensure upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// ==== Load JSON Data ====
+let data: {
+  domains: any[];
+  prompts: any[];
+  code: any[];
+  extensions: any[];
+} = { domains: [], prompts: [], code: [], extensions: [] };
+
+try {
+  if (fs.existsSync(dataPath)) {
+    const fileContent = fs.readFileSync(dataPath, 'utf-8');
+    const parsed = JSON.parse(fileContent);
+
+    data.domains = parsed.domains || [];
+    data.prompts = parsed.prompts || [];
+    data.code = parsed.code || [];
+    data.extensions = parsed.extensions || [];
+  }
+} catch (e) {
+  console.error('Error reading data:', e);
+}
+
+// ==== Helper: save uploaded file ====
+async function saveFile(file: File | null): Promise<string> {
+  if (!file || !file.name) return '';
+  const safeName = file.name.replace(/\s+/g, '-');
+  const uniqueName = `${Date.now()}-${safeName}`;
+  const filePath = path.join(uploadDir, uniqueName);
+  const buffer = await file.arrayBuffer();
+  fs.writeFileSync(filePath, Buffer.from(buffer));
+  return `/uploads/${uniqueName}`;
+}
+
+// ==== Handle POST (Add / Delete) ====
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get('action');
+    const category = formData.get('category'); // domains | prompts | code | extensions
+
+    if (!category || !['domains', 'prompts', 'code', 'extensions'].includes(String(category))) {
+      throw new Error('Invalid category');
+    }
+
+    if (action === 'delete') {
+      const idToDelete = formData.get('id');
+      data[category] = data[category].filter(
+        (item) => String(item.id) !== String(idToDelete)
+      );
+    } else if (action === 'add') {
+      const id = Date.now().toString();
+      const cat = String(category);
+      const newItem: any = { id };
+
+      // ---- DOMAINS ----
+      if (cat === 'domains') {
+        newItem.domain = formData.get('domain');
+        newItem.price = Number(formData.get('price'));
+        newItem.description = formData.get('description') || '';
+        newItem.status = 'Available';
+
+        const logoFile = formData.get('logo') as File | null;
+        newItem.logo = await saveFile(logoFile);
+      }
+
+      // ---- PROMPTS ----
+      if (cat === 'prompts') {
+        newItem.title = formData.get('title');
+        newItem.type = formData.get('type'); // Marketing / Midjourney ..
+        newItem.price = Number(formData.get('price'));
+        newItem.is_free = newItem.price === 0;
+        newItem.description = formData.get('description') || '';
+        newItem.prompt_text = formData.get('prompt_text') || '';
+
+        // Logo for card
+        const logoFile = formData.get('image') as File | null;
+        newItem.image = await saveFile(logoFile);
+
+        // Images gallery
+        const galleryFiles = formData.getAll('gallery') as File[];
+        newItem.gallery = [];
+        for (const file of galleryFiles) {
+          const p = await saveFile(file);
+          if (p) newItem.gallery.push(p);
+        }
+
+        // Single video
+        const videoFile = formData.get('video') as File | null;
+        newItem.video = await saveFile(videoFile);
+      }
+
+      // ---- CODE ----
+      if (cat === 'code') {
+        newItem.title = formData.get('title');
+        newItem.language = formData.get('language');
+        newItem.price = Number(formData.get('price'));
+        newItem.is_free = newItem.price === 0;
+        newItem.description = formData.get('description') || '';
+        newItem.code_content = formData.get('code_content') || '';
+
+        const galleryFiles = formData.getAll('gallery') as File[];
+        newItem.gallery = [];
+        for (const file of galleryFiles) {
+          const p = await saveFile(file);
+          if (p) newItem.gallery.push(p);
+        }
+
+        const videoFile = formData.get('video') as File | null;
+        newItem.video = await saveFile(videoFile);
+      }
+
+      // ---- EXTENSIONS ----
+      if (cat === 'extensions') {
+        // العنوان
+        newItem.title = formData.get('title');
+        newItem.name = newItem.title;
+
+        // التصنيف (يظهر كـ Category في صفحة التفاصيل)
+        newItem.category = formData.get('category') || '';
+
+        // السعر + حالة المجانية
+        newItem.price = Number(formData.get('price'));
+        newItem.is_free = newItem.price === 0;
+
+        // الوصف النصي
+        newItem.description = formData.get('description') || '';
+
+        // شعار الكارد
+        const logoFile = formData.get('logo') as File | null;
+        newItem.logo = await saveFile(logoFile);
+
+        // فيديو المعاينة
+        const videoFile = formData.get('video') as File | null;
+        newItem.video = await saveFile(videoFile);
+
+        // ملف الإضافة المضغوط (ZIP/RAR/...)
+        const downloadFile = formData.get('download') as File | null;
+        newItem.download_url = await saveFile(downloadFile);
+      }
+
+      data[cat].push(newItem);
+    }
+
+    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error('Error saving:', err);
+  }
+}
+---
+
+<style>
+  body { background:#050505; color:#fff; font-family:monospace; }
+  .container { max-width:1100px; margin:40px auto; padding:20px; }
+
+  h1 { color:#00ff88; text-align:center; margin-bottom:30px; }
+
+  .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px; flex-wrap:wrap; }
+  .tab-btn {
+    background:#111; color:#888; border:1px solid #333;
+    padding:8px 14px; cursor:pointer; border-radius:5px; font-size:0.85rem;
+  }
+  .tab-btn.active { background:#00ff88; color:#000; font-weight:bold; border-color:#00ff88; }
+
+  .panel { display:none; background:#111; padding:20px; border-radius:10px; border:1px solid #333; margin-bottom:20px; }
+  .panel.active { display:block; }
+
+  .form-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:14px;
+    margin-bottom:18px;
+  }
+
+  label {
+    color:#00ff88;
+    font-size:0.78rem;
+    margin-bottom:4px;
+    display:block;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    background:#222; border:1px solid #444; color:#fff;
+    padding:8px; width:100%; border-radius:5px; box-sizing:border-box;
+    font-family:inherit; font-size:0.9rem;
+  }
+
+  input[type="file"] {
+    background:#1a1a1a; border:1px dashed #444; color:#aaa;
+    padding:8px; width:100%; border-radius:5px; cursor:pointer;
+  }
+
+  textarea { min-height:90px; }
+
+  .btn-add {
+    background:#00ff88; color:#000; border:none;
+    padding:10px; width:100%; border-radius:5px;
+    font-weight:bold; cursor:pointer; margin-top:4px;
+  }
+  .btn-add:hover { opacity:0.9; }
+
+  table { width:100%; border-collapse:collapse; margin-top:20px; font-size:0.86rem; }
+  th { text-align:left; color:#888; border-bottom:1px solid #333; padding:8px; }
+  td { border-bottom:1px solid #222; padding:8px; vertical-align:middle; }
+  .btn-del {
+    background:#ff4444; color:#fff; border:none;
+    padding:4px 8px; border-radius:3px; cursor:pointer;
+    font-size:0.78rem;
+  }
+
+  .preview-img {
+    width:38px; height:38px; object-fit:cover;
+    border-radius:6px; border:1px solid #333;
+  }
+</style>
+
+<Layout title="DOMIX Admin">
+  <div class="container">
+    <h1>DOMIX ADMIN</h1>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="openTab('domains')">DOMAINS</button>
+      <button class="tab-btn" onclick="openTab('prompts')">PROMPTS</button>
+      <button class="tab-btn" onclick="openTab('code')">CODE</button>
+      <button class="tab-btn" onclick="openTab('extensions')">EXTENSIONS</button>
+    </div>
+
+    <!-- DOMAINS -->
+    <section id="domains" class="panel active">
+      <h3>Domains</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="add" />
+        <input type="hidden" name="category" value="domains" />
+        <div class="form-grid">
+          <div>
+            <label>Domain</label>
+            <input type="text" name="domain" placeholder="BostonCPAFirm.com" required />
+          </div>
+          <div>
+            <label>Price ($)</label>
+            <input type="number" name="price" required />
+          </div>
+          <div>
+            <label>Logo (PNG/JPG)</label>
+            <input type="file" name="logo" accept="image/png,image/jpeg" />
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea name="description" placeholder="Short, memorable domain..."></textarea>
+          </div>
+        </div>
+        <button class="btn-add" type="submit">Add Domain</button>
+      </form>
+
+      <table>
+        <thead><tr><th>Logo</th><th>Domain</th><th>Price</th><th>Action</th></tr></thead>
+        <tbody>
+          {data.domains.map((item) => (
+            <tr>
+              <td>{item.logo ? <img src={item.logo} class="preview-img" /> : '-'}</td>
+              <td>{item.domain}</td>
+              <td>${item.price}</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="category" value="domains" />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button class="btn-del" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PROMPTS -->
+    <section id="prompts" class="panel">
+      <h3>Prompts</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="add" />
+        <input type="hidden" name="category" value="prompts" />
+        <div class="form-grid">
+          <div><label>Title</label><input type="text" name="title" required /></div>
+          <div><label>Type</label><input type="text" name="type" placeholder="Marketing / Midjourney" required /></div>
+          <div><label>Price ($)</label><input type="number" name="price" required /></div>
+
+          <div>
+            <label>Logo (PNG/JPG) — Card</label>
+            <input type="file" name="image" accept="image/png,image/jpeg" />
+          </div>
+
+          <div>
+            <label>Gallery Images (multiple PNG)</label>
+            <input type="file" name="gallery" accept="image/*" multiple />
+          </div>
+
+          <div>
+            <label>Video (MP4)</label>
+            <input type="file" name="video" accept="video/mp4" />
+          </div>
+
+          <div><label>Description</label><textarea name="description"></textarea></div>
+          <div><label>Prompt Content</label><textarea name="prompt_text"></textarea></div>
+        </div>
+        <button class="btn-add" type="submit">Add Prompt</button>
+      </form>
+
+      <table>
+        <thead><tr><th>Logo</th><th>Title</th><th>Media</th><th>Price</th><th>Action</th></tr></thead>
+        <tbody>
+          {data.prompts.map((item) => (
+            <tr>
+              <td>
+                {item.image ? <img src={item.image} class="preview-img" /> : '-'}
+              </td>
+              <td>{item.title}</td>
+              <td>{(item.gallery?.length || 0)} imgs{item.video ? ', 1 vid' : ''}</td>
+              <td>{item.price === 0 ? 'FREE' : `$${item.price}`}</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="category" value="prompts" />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button class="btn-del" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CODE -->
+    <section id="code" class="panel">
+      <h3>Code</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="add" />
+        <input type="hidden" name="category" value="code" />
+        <div class="form-grid">
+          <div><label>Title</label><input type="text" name="title" required /></div>
+          <div><label>Language</label><input type="text" name="language" placeholder="Python / JS" required /></div>
+          <div><label>Price ($)</label><input type="number" name="price" required /></div>
+
+          <div>
+            <label>Gallery Images (PNG)</label>
+            <input type="file" name="gallery" accept="image/*" multiple />
+          </div>
+
+          <div>
+            <label>Video (MP4)</label>
+            <input type="file" name="video" accept="video/mp4" />
+          </div>
+
+          <div><label>Description</label><textarea name="description"></textarea></div>
+          <div><label>Code Content</label><textarea name="code_content"></textarea></div>
+        </div>
+        <button class="btn-add" type="submit">Add Code</button>
+      </form>
+
+      <table>
+        <thead><tr><th>Title</th><th>Media</th><th>Price</th><th>Action</th></tr></thead>
+        <tbody>
+          {data.code.map((item) => (
+            <tr>
+              <td>{item.title}</td>
+              <td>{(item.gallery?.length || 0)} imgs{item.video ? ', 1 vid' : ''}</td>
+              <td>{item.price === 0 ? 'FREE' : `$${item.price}`}</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="category" value="code" />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button class="btn-del" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- EXTENSIONS -->
+    <section id="extensions" class="panel">
+      <h3>Extensions</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="add" />
+        <input type="hidden" name="category" value="extensions" />
+        <div class="form-grid">
+          <div>
+            <label>Title</label>
+            <input type="text" name="title" placeholder="Focus Guard" required />
+          </div>
+
+          <div>
+            <label>Category / Type</label>
+            <input type="text" name="category" placeholder="Productivity / Lead Gen / Focus" />
+          </div>
+
+          <div>
+            <label>Price ($)</label>
+            <input type="number" name="price" required />
+          </div>
+
+          <div>
+            <label>Logo (PNG/JPG) — Card</label>
+            <input type="file" name="logo" accept="image/png,image/jpeg" />
+          </div>
+
+          <div>
+            <label>Video (MP4) — Details</label>
+            <input type="file" name="video" accept="video/mp4" />
+          </div>
+
+          <div>
+            <label>Extension File (ZIP / RAR)</label>
+            <input type="file" name="download" accept=".zip,.rar,.7z,.crx" />
+          </div>
+
+          <div>
+            <label>Description</label>
+            <textarea name="description" placeholder="Short description shown on details page"></textarea>
+          </div>
+        </div>
+        <button class="btn-add" type="submit">Add Extension</button>
+      </form>
+
+      <table>
+        <thead><tr><th>Logo</th><th>Title</th><th>Price</th><th>Action</th></tr></thead>
+        <tbody>
+          {data.extensions.map((item) => (
+            <tr>
+              <td>
+                {item.logo ? <img src={item.logo} class="preview-img" /> : '-'}
+              </td>
+              <td>{item.title}</td>
+              <td>{item.price === 0 ? 'FREE' : `$${item.price}`}</td>
+              <td>
+                <form method="POST">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="category" value="extensions" />
+                  <input type="hidden" name="id" value={item.id} />
+                  <button class="btn-del" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</Layout>
+
+<script>
+  window.openTab = (tabName) => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+
+    const order = ['domains', 'prompts', 'code', 'extensions'];
+    const idx = order.indexOf(tabName);
+    if (idx >= 0) {
+      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    }
+  };
+</script>
