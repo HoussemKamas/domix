@@ -326,21 +326,6 @@ const allDomains = [...(data.domains ?? [])].sort(byIdDesc);
   </style>
 
   <script>
-    // ====== Auto-redirect من index.astro ======
-    (function() {
-      var urlParams = new URLSearchParams(window.location.search);
-      var gotoId = urlParams.get('goto');
-      
-      if (gotoId) {
-        // إزالة الـ query parameter من الـ URL
-        var cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-        
-        // التوجيه إلى domains-details
-        window.location.href = '/domains-details#' + gotoId;
-      }
-    })();
-
     // ====== تفعيل/إلغاء الـ Favorite على القلوب ======
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.fav').forEach(function(btn) {
