@@ -1040,7 +1040,7 @@ for(let i = 0; i < 35; i++){
           }, 2000);
         }, { passive:false });
 
-        // ====== معالجة الروابط: history + navigation ======
+        // ====== معالجة الروابط: navigation مباشر ======
         const domainLinks = listEl.querySelectorAll("a.domain-link");
         domainLinks.forEach(function(a) {
           const name = a.textContent;
@@ -1056,13 +1056,11 @@ for(let i = 0; i < 35; i++){
             const domainId = a.getAttribute('data-domain-id');
             if (!domainId) return;
             
-            // أولاً: أضف /domains في الـ history
-            window.history.pushState({}, '', '/domains');
+            // حفظ معلومة أننا جئنا من index
+            sessionStorage.setItem('fromIndex', 'true');
             
-            // ثانياً: اذهب مباشرة للتفاصيل بعد تأخير صغير
-            setTimeout(function() {
-              window.location.href = '/domains-details#' + domainId;
-            }, 50);
+            // الذهاب مباشرة للتفاصيل
+            window.location.href = '/domains-details#' + domainId;
           });
         });
 
