@@ -917,7 +917,7 @@ for(let i = 0; i < 35; i++){
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href="#" class="domain-link" data-domain-id={item.id} title={item.domain ?? item.name}>
+            <a href={`/domain-detail#${item.id}`} class="domain-link" title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
@@ -1040,27 +1040,12 @@ for(let i = 0; i < 35; i++){
           }, 2000);
         }, { passive:false });
 
-        // ====== معالجة الروابط: navigation مباشر ======
+        // ====== معالجة الروابط: hover للخلفية فقط ======
         const domainLinks = listEl.querySelectorAll("a.domain-link");
         domainLinks.forEach(function(a) {
           const name = a.textContent;
-          
-          // Hover effect للخلفية
           a.addEventListener("mouseenter", function() {
             applyDomainBg(name);
-          });
-
-          // Click event للتنقل
-          a.addEventListener("click", function(e) {
-            e.preventDefault();
-            const domainId = a.getAttribute('data-domain-id');
-            if (!domainId) return;
-            
-            // حفظ معلومة أننا جئنا من index
-            sessionStorage.setItem('fromIndex', 'true');
-            
-            // الذهاب مباشرة للتفاصيل
-            window.location.href = '/domains-details#' + domainId;
           });
         });
 
