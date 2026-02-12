@@ -917,7 +917,7 @@ for(let i = 0; i < 35; i++){
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href={`domains?goto=${item.id}`} title={item.domain ?? item.name}>
+            <a href="#" class="domain-link" data-domain-id={item.id} title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
@@ -977,11 +977,11 @@ for(let i = 0; i < 35; i++){
       const tlds = ["com","net","org","xyz"];
       const tldExtEl = document.getElementById("tldExt");
       let tldIndex = 0;
-      setInterval(() => {
+      setInterval(function() {
         tldIndex = (tldIndex + 1) % tlds.length;
         if(tldExtEl){
           tldExtEl.style.opacity = "0";
-          setTimeout(() => {
+          setTimeout(function() {
             tldExtEl.textContent = tlds[tldIndex];
             tldExtEl.style.opacity = "1";
           }, 140);
@@ -997,7 +997,7 @@ for(let i = 0; i < 35; i++){
       let contentHeight = 0;
       let halfHeight = 0;
 
-      const contentHeightInit = () => {
+      const contentHeightInit = function() {
         if(listEl){
           contentHeight = listEl.scrollHeight;
           halfHeight = contentHeight / 2;
@@ -1024,7 +1024,7 @@ for(let i = 0; i < 35; i++){
         }
         requestAnimationFrame(rafLoop);
 
-        riseEl.addEventListener("wheel", (e) => {
+        riseEl.addEventListener("wheel", function(e) {
           e.preventDefault();
           autoPaused = true;
           const delta = e.deltaY;
@@ -1035,10 +1035,38 @@ for(let i = 0; i < 35; i++){
           if(listEl) listEl.style.transform = "translateY(" + autoY + "px)";
 
           clearTimeout(riseEl._wheelTimeout);
-          riseEl._wheelTimeout = setTimeout(() => {
+          riseEl._wheelTimeout = setTimeout(function() {
             autoPaused = false;
           }, 2000);
         }, { passive:false });
+
+        // ====== معالجة الروابط: history + navigation ======
+        const domainLinks = listEl.querySelectorAll("a.domain-link");
+        domainLinks.forEach(function(a) {
+          const name = a.textContent;
+          
+          // Hover effect للخلفية
+          a.addEventListener("mouseenter", function() {
+            applyDomainBg(name);
+          });
+
+          // Click event للتنقل
+          a.addEventListener("click", function(e) {
+            e.preventDefault();
+            const domainId = a.getAttribute('data-domain-id');
+            if (!domainId) return;
+            
+            // أولاً: أضف /domains في الـ history
+            window.history.pushState({}, '', '/domains');
+            
+            // ثانياً: اذهب مباشرة للتفاصيل بعد تأخير صغير
+            setTimeout(function() {
+              window.location.href = '/domains-details#' + domainId;
+            }, 50);
+          });
+        });
+
+        riseEl.addEventListener("mouseleave", clearDomainBg);
       }
 
       const bgPhoto = document.getElementById("bgPhoto");
@@ -1068,15 +1096,6 @@ for(let i = 0; i < 35; i++){
         bgPhoto.style.backgroundImage = "";
       }
 
-      if(listEl && riseEl){
-        const domainLinks = listEl.querySelectorAll("a");
-        domainLinks.forEach(a => {
-          const name = a.textContent;
-          a.addEventListener("mouseenter", () => applyDomainBg(name));
-        });
-        riseEl.addEventListener("mouseleave", clearDomainBg);
-      }
-
       const promptFloat = document.getElementById("promptFloat");
       const promptWordsUI = ["PROMPT", "IDEA", "SYSTEM", "CHAIN", "VISION"];
       let pw = 0;
@@ -1090,17 +1109,17 @@ for(let i = 0; i < 35; i++){
         promptFloat.innerHTML = '<span id="promptText"></span><span class="prompt-caret"></span>';
         const promptText = document.getElementById("promptText");
         let pc = 0;
-        const type = () => {
+        const type = function() {
           if(promptText) promptText.textContent = word.slice(0, pc);
           pc++;
           if (pc <= word.length){
             setTimeout(type, 65);
           } else {
-            setTimeout(() => {
+            setTimeout(function() {
               promptFloat.style.transition = "transform 1.1s ease, opacity 1.1s ease";
               promptFloat.style.transform = "translateY(-95px)";
               promptFloat.style.opacity = "0";
-              setTimeout(() => {
+              setTimeout(function() {
                 pw = (pw + 1) % promptWordsUI.length;
                 runPrompt();
               }, 1150);
@@ -1127,8 +1146,8 @@ for(let i = 0; i < 35; i++){
         charIndex++;
         if (charIndex <= line.length) setTimeout(typeLoop, 42);
         else {
-          setTimeout(() => {
-            const erase = () => {
+          setTimeout(function() {
+            const erase = function() {
               charIndex--;
               if(codeTypingEl) codeTypingEl.textContent = line.slice(0, charIndex);
               if (charIndex > 0) setTimeout(erase, 18);
@@ -1147,7 +1166,7 @@ for(let i = 0; i < 35; i++){
       const cardContact = document.getElementById("cardContact");
       let timers = [];
 
-      function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+      function clearTimers(){ timers.forEach(function(t) { clearTimeout(t); }); timers = []; }
       function resetAll(){
         clearTimers();
         document.body.classList.remove("focus-domains","focus-contact","domains-panel-on","domains-rise-on","contact-panel-on");
@@ -1159,25 +1178,25 @@ for(let i = 0; i < 35; i++){
       }
 
       if(cardDomains){
-        cardDomains.addEventListener("mouseenter", () => {
+        cardDomains.addEventListener("mouseenter", function() {
           resetAll();
           document.body.classList.add("focus-domains");
-          timers.push(setTimeout(() => {
+          timers.push(setTimeout(function() {
             document.body.classList.add("domains-panel-on");
             const domainWall = document.getElementById("domainWall");
             if(domainWall) domainWall.setAttribute("aria-hidden","false");
           }, 240));
-          timers.push(setTimeout(() => {
+          timers.push(setTimeout(function() {
             document.body.classList.add("domains-rise-on");
           }, 420));
         });
       }
 
       if(cardContact){
-        cardContact.addEventListener("mouseenter", () => {
+        cardContact.addEventListener("mouseenter", function() {
           resetAll();
           document.body.classList.add("focus-contact");
-          timers.push(setTimeout(() => {
+          timers.push(setTimeout(function() {
             document.body.classList.add("contact-panel-on");
             const contactPanel = document.getElementById("contactPanel");
             if(contactPanel) contactPanel.setAttribute("aria-hidden","false");
@@ -1185,7 +1204,7 @@ for(let i = 0; i < 35; i++){
         });
       }
 
-      document.addEventListener("mousemove", (e) => {
+      document.addEventListener("mousemove", function(e) {
         const inside = e.target.closest("#stage, #domainWall, #contactPanel, #cardDomains, #cardContact");
         if (!inside) resetAll();
       });
@@ -1194,10 +1213,10 @@ for(let i = 0; i < 35; i++){
       const cardCode = document.getElementById("cardCode");
       const cardExtension = document.getElementById("cardExtension");
 
-      if(cardPrompts) cardPrompts.addEventListener("click", () => window.location.href = "prompts/");
-      if(cardCode) cardCode.addEventListener("click", () => window.location.href = "code/");
-      if(cardDomains) cardDomains.addEventListener("click", () => window.location.href = "domains/");
-      if(cardExtension) cardExtension.addEventListener("click", () => window.location.href = "extension/");
+      if(cardPrompts) cardPrompts.addEventListener("click", function() { window.location.href = "prompts/"; });
+      if(cardCode) cardCode.addEventListener("click", function() { window.location.href = "code/"; });
+      if(cardDomains) cardDomains.addEventListener("click", function() { window.location.href = "domains/"; });
+      if(cardExtension) cardExtension.addEventListener("click", function() { window.location.href = "extension/"; });
     });
   </script>
 </Layout>
