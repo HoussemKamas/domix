@@ -34,6 +34,40 @@ const latestDomains    = [...data.domains].sort(byIdDesc).slice(0, 3);
 const latestPrompts    = [...data.prompts].sort(byIdDesc).slice(0, 3);
 const latestCode       = [...data.code].sort(byIdDesc).slice(0, 3);
 const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
+
+// Generate background chips data
+const codeSnips = [
+  "fetch('/api/domains')",
+  "deploy('edge-functions')",
+  "async mintPrompt() { }",
+  "const lead = qualify(domain)",
+  "if(offer > floor) accept();"
+];
+const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
+const domainWords = [
+  "BostonCPAFirm.com",
+  "HomebuyersDubai.com",
+  "HomebuyersToronto.com",
+  "TopRealtorOrlando.com"
+];
+
+const bgChips = [];
+for(let i = 0; i < 30; i++){
+  const mode = Math.random();
+  let className = "bg-chip";
+  if (mode < 0.33) className += " code";
+  else if (mode < 0.66) className += " alt";
+  
+  const pickArr = mode < 0.33 ? codeSnips : (mode < 0.66 ? domainWords : promptWords);
+  const text = pickArr[Math.floor(Math.random() * pickArr.length)];
+  
+  const x = Math.random() * 100;
+  const y = Math.random() * 100;
+  const delay = Math.random() * 8;
+  const duration = 6 + Math.random() * 6;
+  
+  bgChips.push({ className, text, x, y, delay, duration });
+}
 ---
 
 <Layout title="DOMIX - Future Marketplace">
@@ -143,6 +177,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       opacity:0;
       transform: translate3d(0,0,0);
       animation: chipFloat 8s linear infinite;
+      will-change: transform, opacity;
     }
     .bg-chip.alt{
       color: rgba(188,19,254,.35);
@@ -805,19 +840,22 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     }
   </style>
 
-  <!-- photo layer -->
   <div class="bg-photo" id="bgPhoto"></div>
-
-  <!-- grid background -->
   <div class="cyber-grid"></div>
-
-  <!-- light overlay -->
   <div class="bg-overlay"></div>
+  
+  <!-- Floating background text - Generated in HTML -->
+  <div class="bg-streams" id="bgStreams">
+    {bgChips.map((chip) => (
+      <span 
+        class={chip.className}
+        style={`left: ${chip.x}%; top: ${chip.y}%; animation-duration: ${chip.duration}s; animation-delay: ${-chip.delay}s;`}
+      >
+        {chip.text}
+      </span>
+    ))}
+  </div>
 
-  <!-- floating background text -->
-  <div class="bg-streams" id="bgStreams"></div>
-
-  <!-- Domains panel -->
   <aside class="domain-wall" id="domainWall" aria-hidden="true">
     <div class="head">
       <div class="ttl">Featured Domains</div>
@@ -836,7 +874,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     </div>
   </aside>
 
-  <!-- Contact panel -->
   <aside class="contact-panel" id="contactPanel" aria-hidden="true">
     <div class="ttl">Contact</div>
 
@@ -844,19 +881,8 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       <a class="contact-pill pill-gmail" href="mailto:houssemkamas96@gmail.com">
         <div class="pill-ico" title="Email">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M4 7.5V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V7.5"
-              stroke="white"
-              stroke-width="1.8"
-              stroke-linecap="round"
-            />
-            <path
-              d="M4.2 7.4L12 13.2L19.8 7.4"
-              stroke="white"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
+            <path d="M4 7.5V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V7.5" stroke="white" stroke-width="1.8" stroke-linecap="round" />
+            <path d="M4.2 7.4L12 13.2L19.8 7.4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M6 6.5H18" stroke="rgba(0,243,255,.9)" stroke-width="2" stroke-linecap="round" />
           </svg>
         </div>
@@ -866,27 +892,11 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
         </div>
       </a>
 
-      <a
-        class="contact-pill pill-wa"
-        href="https://wa.me/213781302576?text=Hello%20my%20friend%2C%0AIf%20you%20have%20any%20questions%2C%20I%27m%20here%20to%20help.%0AJust%20leave%20a%20message%20and%20I%27ll%20reply%20soon.%0AThank%20you%20for%20contacting%20me.%20Have%20a%20nice%20day%21"
-        target="_blank"
-        rel="noopener"
-      >
+      <a class="contact-pill pill-wa" href="https://wa.me/213781302576?text=Hello%20my%20friend%2C%0AIf%20you%20have%20any%20questions%2C%20I%27m%20here%20to%20help.%0AJust%20leave%20a%20message%20and%20I%27ll%20reply%20soon.%0AThank%20you%20for%20contacting%20me.%20Have%20a%20nice%20day%21" target="_blank" rel="noopener">
         <div class="pill-ico" title="WhatsApp">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M12 20.5C16.7 20.5 20.5 16.7 20.5 12C20.5 7.3 16.7 3.5 12 3.5C7.3 3.5 3.5 7.3 3.5 12C3.5 13.4 3.8 14.7 4.4 15.9L3.5 20.5L8.2 19.6C9.3 20.2 10.6 20.5 12 20.5Z"
-              stroke="white"
-              stroke-width="1.8"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M9.3 9.2C9.6 8.7 10 8.7 10.4 8.7C10.7 8.7 11 8.7 11.2 9.1L11.8 10.3C12 10.7 11.9 11 11.6 11.3L11.2 11.7C11.7 12.8 12.6 13.6 13.7 14.1L14.1 13.7C14.4 13.4 14.7 13.3 15.1 13.5L16.4 14.1C16.8 14.3 16.8 14.7 16.8 15C16.8 15.6 16.3 16.1 15.7 16.3C15 16.6 13.9 16.5 12.3 15.7C10.8 15 9.4 13.6 8.7 12.1C7.9 10.5 7.8 9.4 8.1 8.7C8.3 8.1 8.8 7.6 9.3 7.6"
-              stroke="rgba(0,255,136,.95)"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
+            <path d="M12 20.5C16.7 20.5 20.5 16.7 20.5 12C20.5 7.3 16.7 3.5 12 3.5C7.3 3.5 3.5 7.3 3.5 12C3.5 13.4 3.8 14.7 4.4 15.9L3.5 20.5L8.2 19.6C9.3 20.2 10.6 20.5 12 20.5Z" stroke="white" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M9.3 9.2C9.6 8.7 10 8.7 10.4 8.7C10.7 8.7 11 8.7 11.2 9.1L11.8 10.3C12 10.7 11.9 11 11.6 11.3L11.2 11.7C11.7 12.8 12.6 13.6 13.7 14.1L14.1 13.7C14.4 13.4 14.7 13.3 15.1 13.5L16.4 14.1C16.8 14.3 16.8 14.7 16.8 15C16.8 15.6 16.3 16.1 15.7 16.3C15 16.6 13.9 16.5 12.3 15.7C10.8 15 9.4 13.6 8.7 12.1C7.9 10.5 7.8 9.4 8.1 8.7C8.3 8.1 8.8 7.6 9.3 7.6" stroke="rgba(0,255,136,.95)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
         <div class="pill-text">
@@ -1048,50 +1058,6 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           }, 2000);
         }, { passive:false });
       }
-
-      const bgStreams = document.getElementById("bgStreams");
-      const codeSnips = [
-        "fetch('/api/domains')",
-        "deploy('edge-functions')",
-        "async mintPrompt() { }",
-        "const lead = qualify(domain)",
-        "if(offer > floor) accept();"
-      ];
-      const promptWords = ["BRAND", "LEADS", "SYSTEM PROMPT", "AGENT", "FUNNEL"];
-      const domainWords = [
-        "BostonCPAFirm.com",
-        "HomebuyersDubai.com",
-        "HomebuyersToronto.com",
-        "TopRealtorOrlando.com"
-      ];
-
-      function spawnChips(count){
-        if(!bgStreams) return;
-        for(let i=0;i<count;i++){
-          const el = document.createElement("span");
-          el.classList.add("bg-chip");
-          const mode = Math.random();
-          if (mode < 0.33) el.classList.add("code");
-          else if (mode < 0.66) el.classList.add("alt");
-
-          const pickArr = mode < 0.33 ? codeSnips : (mode < 0.66 ? domainWords : promptWords);
-          el.textContent = pickArr[Math.floor(Math.random()*pickArr.length)];
-
-          const x = Math.random()*100;
-          const y = Math.random()*100;
-          const delay = Math.random()*8;
-          const duration = 6 + Math.random()*6;
-
-          el.style.left = x + "%";
-          el.style.top = y + "%";
-          el.style.animationDuration = duration + "s";
-          el.style.animationDelay = (-delay) + "s";
-
-          bgStreams.appendChild(el);
-        }
-      }
-      
-      spawnChips(28);
 
       const bgPhoto = document.getElementById("bgPhoto");
       const domainBgMap = {
