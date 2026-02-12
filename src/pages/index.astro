@@ -332,7 +332,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       align-items:center;
       justify-content:center;
       box-shadow: 0 0 18px rgba(0,0,0,.6);
-      transition: box-shadow .25s ease, border-color .25s.ease;
+      transition: box-shadow .25s ease, border-color .25s ease;
     }
     .card-prompts:hover .prompt-sky{
       border-color: rgba(188,19,254,.35);
@@ -375,7 +375,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       z-index:2;
       overflow:hidden;
       box-shadow: 0 0 18px rgba(0,0,0,.6);
-      transition: box-shadow .25s ease, border-color .25s.ease;
+      transition: box-shadow .25s ease, border-color .25s ease;
     }
     .card-code:hover .laptop{
       border-color: rgba(0,255,136,.35);
@@ -795,6 +795,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       transform: translateY(-4px);
       transition: transform .25s ease, box-shadow .25s ease;
     }
+    /* ===== نهاية ستايل extension ===== */
   </style>
 
   <!-- photo layer controlled by hovered domain -->
@@ -816,7 +817,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       <ul id="domainRiseList">
         {latestDomains.map((item) => (
           <li>
-            <a href="domains-details#{item.id}" title={item.domain ?? item.name}>
+            <a href={`/domains-details#${item.id}`} title={item.domain ?? item.name}>
               {item.domain ?? item.name}
             </a>
           </li>
@@ -923,7 +924,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
           <div class="sub">Snippets & templates</div>
         </div>
 
-        <!-- Extension -->
+        <!-- Extension (من نفس الخط وقبل Contact) -->
         <div class="menu-card card-extension" id="cardExtension">
           <div class="ext-orb">
             <div class="ext-window">
@@ -1043,7 +1044,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
     // floating background text
     const bgStreams = document.getElementById("bgStreams");
     const codeSnips = [
-      "fetch('api/domains')",
+      "fetch('/api/domains')",
       "deploy('edge-functions')",
       "async mintPrompt() { }",
       "const lead = qualify(domain)",
@@ -1226,7 +1227,7 @@ const latestExtensions = [...data.extensions].sort(byIdDesc).slice(0, 3);
       if (!inside) resetAll();
     });
 
-    // click routes
+    // click routes (you can change later)
     document.getElementById("cardPrompts").addEventListener("click", () => window.location.href = "prompts/");
     document.getElementById("cardCode").addEventListener("click", () => window.location.href = "code/");
     cardDomains.addEventListener("click", () => window.location.href = "domains/");
